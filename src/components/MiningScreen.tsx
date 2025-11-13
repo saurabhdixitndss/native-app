@@ -62,7 +62,7 @@ export function MiningScreen({ session, onComplete, onCancel }: MiningScreenProp
 
   return (
     <LinearGradient
-      colors={['#581C87', '#1E3A8A', '#000000']}
+      colors={['#1a0033', '#0a0a2e', '#16213e', '#000000']}
       style={styles.container}
     >
       <SafeAreaView style={styles.safeArea}>
@@ -70,13 +70,13 @@ export function MiningScreen({ session, onComplete, onCancel }: MiningScreenProp
           {/* Header */}
           <View style={styles.header}>
             <LinearGradient
-              colors={['#FBBF24', '#F97316']}
+              colors={['#FBBF24', '#F97316', '#EF4444']}
               style={styles.iconGradient}
             >
               <Pickaxe size={48} color="#FFFFFF" />
             </LinearGradient>
-            <Text style={styles.headerTitle}>Mining in Progress</Text>
-            <Text style={styles.headerSubtitle}>Your tokens are being generated...</Text>
+            <Text style={styles.headerTitle}>⛏️ MINING IN PROGRESS ⛏️</Text>
+            <Text style={styles.headerSubtitle}>💎 Your tokens are being generated... 💎</Text>
           </View>
 
           {/* Timer Card */}
@@ -119,11 +119,11 @@ export function MiningScreen({ session, onComplete, onCancel }: MiningScreenProp
           </Card>
 
           {/* Mined Tokens Card */}
-          <Card style={StyleSheet.flatten([styles.card, styles.tokensCard])}>
+          <Card style={StyleSheet.flatten([styles.card, styles.tokensCard])} glow>
             <CardHeader>
               <View style={styles.cardTitleCenter}>
                 <Coins size={20} color="#FBBF24" />
-                <CardTitle>Tokens Mined</CardTitle>
+                <CardTitle>🪙 Tokens Mined</CardTitle>
               </View>
             </CardHeader>
             <CardContent style={styles.tokensContent}>
@@ -197,12 +197,21 @@ const styles = StyleSheet.create({
   },
   iconGradient: {
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 20,
+    shadowColor: '#FBBF24',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 25,
+    elevation: 15,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '900',
     color: '#FFFFFF',
+    textShadowColor: '#8B5CF6',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 15,
+    letterSpacing: 1,
   },
   headerSubtitle: {
     fontSize: 16,
@@ -232,9 +241,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   timerValue: {
-    fontSize: 36,
-    fontWeight: '600',
+    fontSize: 40,
+    fontWeight: '900',
     color: '#FFFFFF',
+    textShadowColor: '#8B5CF6',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
   timerLabel: {
     fontSize: 12,
@@ -275,9 +287,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   tokensAmount: {
-    fontSize: 48,
-    fontWeight: '600',
+    fontSize: 52,
+    fontWeight: '900',
     color: '#FFFFFF',
+    textShadowColor: '#FBBF24',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
   },
   tokensLabel: {
     fontSize: 18,

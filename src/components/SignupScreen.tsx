@@ -31,7 +31,7 @@ export function SignupScreen({ onSignup }: SignupScreenProps) {
 
   return (
     <LinearGradient
-      colors={['#581C87', '#1E3A8A', '#000000']}
+      colors={['#1a0033', '#0a0a2e', '#000000']}
       style={styles.container}
     >
       <SafeAreaView style={styles.safeArea}>
@@ -40,17 +40,17 @@ export function SignupScreen({ onSignup }: SignupScreenProps) {
           style={styles.keyboardView}
         >
           <ScrollView contentContainerStyle={styles.scrollContent}>
-            <Card style={styles.card}>
+            <Card style={styles.card} glow>
               <CardHeader style={styles.header}>
                 <View style={styles.iconContainer}>
                   <LinearGradient
-                    colors={['#FBBF24', '#F97316']}
+                    colors={['#FBBF24', '#F97316', '#EF4444']}
                     style={styles.iconGradient}
                   >
                     <Pickaxe size={48} color="#FFFFFF" />
                   </LinearGradient>
                 </View>
-                <CardTitle style={styles.title}>Crypto Miner</CardTitle>
+                <CardTitle style={styles.title}>⚡ CRYPTO MINER ⚡</CardTitle>
                 <CardDescription style={styles.description}>
                   Start mining tokens and build your crypto wealth
                 </CardDescription>
@@ -120,11 +120,22 @@ const styles = StyleSheet.create({
   },
   iconGradient: {
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 20,
+    shadowColor: '#FBBF24',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
+    elevation: 10,
   },
   title: {
     textAlign: 'center',
     marginBottom: 8,
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    textShadowColor: '#8B5CF6',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 15,
   },
   description: {
     textAlign: 'center',

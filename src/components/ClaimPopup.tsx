@@ -25,11 +25,11 @@ export function ClaimPopup({ minedTokens, onClaim }: ClaimPopupProps) {
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.titleRow}>
-                <PartyPopper size={24} color="#FDE68A" />
-                <Text style={styles.title}>Mining Complete!</Text>
+                <PartyPopper size={28} color="#FDE68A" />
+                <Text style={styles.title}>🎉 MINING COMPLETE! 🎉</Text>
               </View>
               <Text style={styles.description}>
-                Your mining session has finished successfully
+                ✨ Your mining session has finished successfully ✨
               </Text>
             </View>
 
@@ -90,9 +90,14 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     padding: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(251, 191, 36, 0.3)',
-    borderRadius: 16,
+    borderWidth: 3,
+    borderColor: 'rgba(251, 191, 36, 0.8)',
+    borderRadius: 20,
+    shadowColor: '#FBBF24',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 30,
+    elevation: 15,
   },
   header: {
     alignItems: 'center',
@@ -106,8 +111,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '600',
+    fontWeight: '900',
     color: '#FFFFFF',
+    textShadowColor: '#FBBF24',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 15,
+    letterSpacing: 1,
   },
   description: {
     fontSize: 14,
@@ -119,12 +128,17 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   iconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 130,
+    height: 130,
+    borderRadius: 65,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
+    shadowColor: '#FBBF24',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 30,
+    elevation: 20,
   },
   earnedSection: {
     alignItems: 'center',
@@ -135,9 +149,12 @@ const styles = StyleSheet.create({
     color: '#E5E7EB',
   },
   earnedAmount: {
-    fontSize: 60,
-    fontWeight: '600',
+    fontSize: 64,
+    fontWeight: '900',
     color: '#FFFFFF',
+    textShadowColor: '#FBBF24',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 25,
   },
   tokenRow: {
     flexDirection: 'row',
@@ -145,8 +162,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   tokenLabel: {
-    fontSize: 20,
+    fontSize: 22,
+    fontWeight: '800',
     color: '#FDE68A',
+    textShadowColor: '#F97316',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
   claimButton: {
     marginBottom: 16,

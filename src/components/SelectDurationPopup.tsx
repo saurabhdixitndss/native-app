@@ -59,15 +59,15 @@ export function SelectDurationPopup({ visible, onClose, onStartMining }: SelectD
               {/* Header */}
               <View style={styles.header}>
                 <View style={styles.titleRow}>
-                  <Clock size={20} color="#FFFFFF" />
-                  <Text style={styles.title}>Select Mining Duration</Text>
+                  <Clock size={22} color="#FBBF24" />
+                  <Text style={styles.title}>⏰ Select Duration</Text>
                 </View>
                 <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                  <X size={20} color="#FFFFFF" />
+                  <X size={24} color="#FFFFFF" />
                 </TouchableOpacity>
               </View>
               <Text style={styles.description}>
-                Choose how long you want to mine tokens
+                ⚡ Choose how long you want to mine tokens ⚡
               </Text>
 
               {/* Duration Selection */}
@@ -178,9 +178,14 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     padding: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.3)',
-    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: 'rgba(139, 92, 246, 0.6)',
+    borderRadius: 20,
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 10,
   },
   header: {
     flexDirection: 'row',
@@ -194,9 +199,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '900',
     color: '#FFFFFF',
+    textShadowColor: '#8B5CF6',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+    letterSpacing: 0.5,
   },
   closeButton: {
     padding: 4,
@@ -302,9 +311,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   rewardAmount: {
-    fontSize: 24,
-    fontWeight: '600',
+    fontSize: 28,
+    fontWeight: '900',
     color: '#FFFFFF',
+    textShadowColor: '#FBBF24',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
   rewardToken: {
     fontSize: 16,

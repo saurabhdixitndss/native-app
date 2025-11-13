@@ -24,7 +24,7 @@ export function HomeScreen({
 }: HomeScreenProps) {
   return (
     <LinearGradient
-      colors={['#581C87', '#1E3A8A', '#000000']}
+      colors={['#1a0033', '#0a0a2e', '#16213e', '#000000']}
       style={styles.container}
     >
       <SafeAreaView style={styles.safeArea}>
@@ -32,12 +32,12 @@ export function HomeScreen({
           {/* Header */}
           <View style={styles.header}>
             <LinearGradient
-              colors={['#FBBF24', '#F97316']}
+              colors={['#FBBF24', '#F97316', '#EF4444']}
               style={styles.iconGradient}
             >
               <Pickaxe size={40} color="#FFFFFF" />
             </LinearGradient>
-            <Text style={styles.headerTitle}>Crypto Miner</Text>
+            <Text style={styles.headerTitle}>⚡ CRYPTO MINER ⚡</Text>
           </View>
 
           {/* Wallet Info */}
@@ -54,16 +54,16 @@ export function HomeScreen({
           </Card>
 
           {/* Balance */}
-          <Card style={StyleSheet.flatten([styles.card, styles.balanceCard])}>
+          <Card style={StyleSheet.flatten([styles.card, styles.balanceCard])} glow>
             <CardHeader>
               <View style={styles.cardTitleRow}>
                 <Coins size={20} color="#FBBF24" />
-                <CardTitle>Balance</CardTitle>
+                <CardTitle>💰 Balance</CardTitle>
               </View>
             </CardHeader>
             <CardContent>
               <View style={styles.balanceRow}>
-                <Text style={styles.balanceAmount}>{user.balance.toFixed(2)}</Text>
+                <Text style={styles.balanceAmount}>🪙 {user.balance.toFixed(2)}</Text>
                 <Text style={styles.balanceLabel}>TOKENS</Text>
               </View>
             </CardContent>
@@ -163,12 +163,21 @@ const styles = StyleSheet.create({
   },
   iconGradient: {
     padding: 12,
-    borderRadius: 16,
+    borderRadius: 20,
+    shadowColor: '#FBBF24',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
+    elevation: 10,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+    fontSize: 26,
+    fontWeight: '900',
     color: '#FFFFFF',
+    textShadowColor: '#8B5CF6',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 15,
+    letterSpacing: 1,
   },
   card: {
     marginBottom: 0,
@@ -192,13 +201,20 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   balanceAmount: {
-    fontSize: 36,
-    fontWeight: '600',
+    fontSize: 40,
+    fontWeight: '900',
     color: '#FFFFFF',
+    textShadowColor: '#FBBF24',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 15,
   },
   balanceLabel: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: '700',
     color: '#FBBF24',
+    textShadowColor: '#F97316',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
   statusRow: {
     flexDirection: 'row',
@@ -213,6 +229,11 @@ const styles = StyleSheet.create({
   },
   statusDotActive: {
     backgroundColor: '#4ADE80',
+    shadowColor: '#4ADE80',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 5,
   },
   statusDotCompleted: {
     backgroundColor: '#FBBF24',

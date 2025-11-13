@@ -77,14 +77,17 @@ function App() {
   }, [miningSession]);
 
   const handleSignup = (walletAddress: string) => {
+    console.log('Signup called with wallet:', walletAddress);
     const newUser: UserData = {
       walletAddress,
       balance: 0,
     };
+    console.log('Setting user:', newUser);
     setUser(newUser);
   };
 
   const handleStartMining = (durationHours: number, multiplier: number) => {
+    console.log('Starting mining:', { durationHours, multiplier });
     const durationSeconds = durationHours * 3600;
     const now = Date.now();
     
@@ -98,6 +101,7 @@ function App() {
       minedTokens: 0,
     };
     
+    console.log('New mining session created:', newSession);
     setMiningSession(newSession);
     setShowDurationPopup(false);
   };
@@ -129,7 +133,10 @@ function App() {
     }
   };
 
+  console.log('App render - user:', user, 'miningSession:', miningSession);
+
   if (!user) {
+    console.log('Rendering SignupScreen');
     return (
       <SafeAreaProvider>
         <StatusBar barStyle="light-content" />
@@ -139,6 +146,7 @@ function App() {
   }
 
   if (miningSession?.status === 'mining') {
+    console.log('Rendering MiningScreen with session:', miningSession);
     return (
       <SafeAreaProvider>
         <StatusBar barStyle="light-content" />
@@ -151,13 +159,17 @@ function App() {
     );
   }
 
+  console.log('Rendering HomeScreen');
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="light-content" />
       <HomeScreen
         user={user}
         miningStatus={miningSession?.status || 'idle'}
-        onStartMining={() => setShowDurationPopup(true)}
+        onStartMining={() => {
+          console.log('Start Mining button clicked');
+          setShowDurationPopup(true);
+        }}
         onClaimRewards={() => setShowClaimPopup(true)}
         hasRewardsToClaim={miningSession?.status === 'completed'}
       />
