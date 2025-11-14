@@ -56,7 +56,11 @@ export function Button({
             end={{ x: 1, y: 0 }}
             style={styles.gradient}
           >
-            <Text style={[styles.text, styles.gradientText, styles.textShadow, textStyle]}>{children}</Text>
+            {typeof children === 'string' ? (
+              <Text style={[styles.text, styles.gradientText, styles.textShadow, textStyle]}>{children}</Text>
+            ) : (
+              children
+            )}
           </LinearGradient>
         </TouchableOpacity>
       </Animated.View>
@@ -97,7 +101,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 8,
+    // elevation: 8,
   },
   gradient: {
     paddingVertical: 14,

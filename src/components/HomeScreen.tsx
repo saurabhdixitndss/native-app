@@ -9,13 +9,15 @@ import type { User } from '../services/api';
 
 interface HomeScreenProps {
   user: User | null;
+  hasActiveSession: boolean;
   onStartMining: () => void;
   onRefresh: () => void;
   onLogout: () => void;
 }
 
 export function HomeScreen({ 
-  user, 
+  user,
+  hasActiveSession,
   onStartMining,
   onRefresh,
   onLogout
@@ -104,18 +106,34 @@ export function HomeScreen({
             </CardHeader>
             <CardContent>
               <View style={styles.statusRow}>
-                <View style={[styles.statusDot, styles.statusDotIdle]} />
-                <Text style={styles.statusText}>Ready to Mine</Text>
+                <View style={[
+                  styles.statusDot,
+                  hasActiveSession ? styles.statusDotActive : styles.statusDotIdle
+                ]} />
+                <Text style={styles.statusText}>
+                  {hasActiveSession ? 'Mining Active' : 'Ready to Mine'}
+                </Text>
               </View>
+
+              {hasActiveSession && (
+                <Text style={styles.miningNote}>
+                  ⛏️ You have an active mining session running in the background
+                </Text>
+              )}
 
               <Button 
                 onPress={onStartMining}
-                gradient={['#8B5CF6', '#3B82F6']}
+                gradient={hasActiveSession ? ['#FBBF24', '#F97316'] : ['#8B5CF6', '#3B82F6']}
                 style={styles.actionButton}
               >
                 <View style={styles.buttonContent}>
-                  <Pickaxe size={16} color="#FFFFFF" />
-                  <Text style={[styles.buttonText, styles.buttonTextWhite]}>Start Mining</Text>
+                  <Pickaxe size={16} color={hasActiveSession ? '#000000' : '#FFFFFF'} />
+                  <Text style={[
+                    styles.buttonText,
+                    hasActiveSession ? styles.buttonTextBlack : styles.buttonTextWhite
+                  ]}>
+                    {hasActiveSession ? 'Continue Mining' : 'Start Mining'}
+                  </Text>
                 </View>
               </Button>
             </CardContent>
@@ -193,7 +211,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
     shadowRadius: 20,
-    elevation: 10,
+    // elevation: 10,
   },
   headerTitle: {
     fontSize: 26,
@@ -258,7 +276,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
     shadowRadius: 10,
-    elevation: 5,
+    // elevation: 5,
   },
   statusDotCompleted: {
     backgroundColor: '#FBBF24',
@@ -269,6 +287,14 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 16,
     color: '#D1D5DB',
+  },
+  miningNote: {
+    fontSize: 13,
+    color: '#FBBF24',
+    marginTop: 8,
+    marginBottom: 8,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   actionButton: {
     marginTop: 0,
@@ -285,6 +311,9 @@ const styles = StyleSheet.create({
   },
   buttonTextWhite: {
     color: '#FFFFFF',
+  },
+  buttonTextBlack: {
+    color: '#000000',
   },
   infoGrid: {
     flexDirection: 'row',

@@ -5,21 +5,27 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from './rn/Button';
 import { Card, CardContent, CardHeader, CardTitle } from './rn/Card';
 import { Progress } from './rn/Progress';
-import { Pickaxe, Coins, Clock, X, Zap, ArrowLeft } from './rn/Icons';
+import { Pickaxe, Coins, Clock, Zap } from './rn/Icons';
+import { Home } from './rn/Icons';
 import { miningAPI, MiningSession, Config } from '../services/api';
 
 interface MiningScreenProps {
   session: MiningSession;
   config: Config | null;
   onComplete: () => void;
-  onCancel: () => void;
+  onGoHome: () => void;
   onUpgradeMultiplier: (newMultiplier: number) => void;
 }
 
-export function MiningScreen({ session, config, onComplete, onCancel, onUpgradeMultiplier }: MiningScreenProps) {
+export function MiningScreen({ session, config, onComplete, onGoHome, onUpgradeMultiplier }: MiningScreenProps) {
   const [currentReward, setCurrentReward] = useState(0);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [currentSession, setCurrentSession] = useState(session);
+
+  useEffect(() => {
+    setCurrentSession(session);
+  }, [session]);
 
   useEffect(() => {
     updateMiningStatus();
@@ -29,12 +35,17 @@ export function MiningScreen({ session, config, onComplete, onCancel, onUpgradeM
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [session]);
+  }, [currentSession]);
 
   const updateMiningStatus = async () => {
     try {
-      const response = await miningAPI.getMiningStatus(session._id);
-      const { status } = response;
+      const response = await miningAPI.getMiningStatus(currentSession._id);
+      const { status, session: updatedSession } = response;
+
+      // Update local session if multiplier changed on backend
+      if (updatedSession && updatedSession.multiplier !== currentSession.multiplier) {
+        setCurrentSession(updatedSession);
+      }
 
       setCurrentReward(status.currentReward);
       setRemainingSeconds(status.remainingSeconds);
@@ -52,14 +63,14 @@ export function MiningScreen({ session, config, onComplete, onCancel, onUpgradeM
   const calculateLocalStatus = () => {
     if (!config) return;
 
-    const startTime = parseDate(session.miningStartTime);
+    const startTime = parseDate(currentSession.miningStartTime);
     const now = new Date();
     const elapsedSeconds = Math.floor((now.getTime() - startTime.getTime()) / 1000);
-    const totalSeconds = session.selectedHour * 3600;
+    const totalSeconds = currentSession.selectedHour * 3600;
     
     const reward = Math.min(
-      config.baseRate * session.multiplier * elapsedSeconds,
-      config.baseRate * session.multiplier * totalSeconds
+      config.baseRate * currentSession.multiplier * elapsedSeconds,
+      config.baseRate * currentSession.multiplier * totalSeconds
     );
     
     setCurrentReward(reward);
@@ -102,24 +113,35 @@ export function MiningScreen({ session, config, onComplete, onCancel, onUpgradeM
   const handleUpgrade = () => {
     if (!config) return;
 
-    const availableMultipliers = config.multiplierOptions
-      .filter(opt => opt.value > session.multiplier)
-      .map(opt => ({
-        text: `${opt.value}× ${opt.requiresAd ? '(Watch Ad)' : ''}`,
-        onPress: () => onUpgradeMultiplier(opt.value),
-      }));
+    const currentMultiplier = session.multiplier;
+    const nextMultiplier = currentMultiplier + 1;
 
-    if (availableMultipliers.length === 0) {
-      Alert.alert('Max Multiplier', 'You are already at the maximum multiplier!');
+    if (nextMultiplier > 6) {
+      Alert.alert('🎯 Max Multiplier', 'You are already at the maximum multiplier (6×)!');
+      return;
+    }
+
+    const nextOption = config.multiplierOptions.find(opt => opt.value === nextMultiplier);
+
+    if (!nextOption) {
+      Alert.alert('Error', 'Invalid multiplier option');
       return;
     }
 
     Alert.alert(
-      'Upgrade Multiplier',
-      'Choose a new multiplier to boost your mining speed:',
+      `⚡ Upgrade to ${nextMultiplier}×`,
+      `Upgrade your multiplier from ${currentMultiplier}× to ${nextMultiplier}×?\n\n${
+        nextOption.requiresAd ? '📺 Watch an ad to unlock' : '✅ Free upgrade'
+      }\n\nYour mining rate will increase immediately!`,
       [
-        ...availableMultipliers,
         { text: 'Cancel', style: 'cancel' },
+        {
+          text: nextOption.requiresAd ? 'Watch Ad & Upgrade' : 'Upgrade',
+          onPress: () => {
+            // TODO: Show ad if required
+            onUpgradeMultiplier(nextMultiplier);
+          },
+        },
       ]
     );
   };
@@ -134,14 +156,14 @@ export function MiningScreen({ session, config, onComplete, onCancel, onUpgradeM
     >
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Back Button */}
-          <TouchableOpacity onPress={onCancel} style={styles.backButton}>
+          {/* Home Button */}
+          <TouchableOpacity onPress={onGoHome} style={styles.homeButton}>
             <LinearGradient
               colors={['rgba(139, 92, 246, 0.2)', 'rgba(59, 130, 246, 0.2)']}
-              style={styles.backGradient}
+              style={styles.homeGradient}
             >
-              <ArrowLeft size={20} color="#8B5CF6" />
-              <Text style={styles.backText}>Back</Text>
+              <Home size={20} color="#8B5CF6" />
+              <Text style={styles.homeText}>Home</Text>
             </LinearGradient>
           </TouchableOpacity>
 
@@ -211,16 +233,16 @@ export function MiningScreen({ session, config, onComplete, onCancel, onUpgradeM
               <View style={styles.detailsGrid}>
                 <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>Duration</Text>
-                  <Text style={styles.detailValue}>{session.selectedHour}h</Text>
+                  <Text style={styles.detailValue}>{currentSession.selectedHour}h</Text>
                 </View>
                 <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>Multiplier</Text>
-                  <Text style={styles.detailValue}>{session.multiplier}×</Text>
+                  <Text style={styles.detailValue}>{currentSession.multiplier}×</Text>
                 </View>
                 <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>Rate</Text>
                   <Text style={styles.detailValue}>
-                    {config ? (config.baseRate * session.multiplier).toFixed(4) : '0.00'}/s
+                    {config ? (config.baseRate * currentSession.multiplier).toFixed(4) : '0.00'}/s
                   </Text>
                 </View>
               </View>
@@ -237,17 +259,6 @@ export function MiningScreen({ session, config, onComplete, onCancel, onUpgradeM
               </Button>
             </CardContent>
           </Card>
-
-          <Button
-            onPress={onCancel}
-            gradient={['#EF4444', '#DC2626']}
-            style={styles.cancelButton}
-          >
-            <View style={styles.buttonContent}>
-              <X size={16} color="#FFFFFF" />
-              <Text style={styles.buttonText}>Cancel Mining</Text>
-            </View>
-          </Button>
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>
@@ -266,13 +277,13 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     gap: 24,
   },
-  backButton: {
-    alignSelf: 'flex-start',
+  homeButton: {
+    alignSelf: 'flex-end',
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 8,
   },
-  backGradient: {
+  homeGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -282,7 +293,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(139, 92, 246, 0.3)',
     borderRadius: 12,
   },
-  backText: {
+  homeText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#8B5CF6',
@@ -299,7 +310,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
     shadowRadius: 20,
-    elevation: 10,
+    // elevation: 10,
   },
   headerTitle: {
     fontSize: 24,
@@ -405,9 +416,6 @@ const styles = StyleSheet.create({
   },
   upgradeButton: {
     marginTop: 8,
-  },
-  cancelButton: {
-    marginBottom: 0,
   },
   buttonContent: {
     flexDirection: 'row',

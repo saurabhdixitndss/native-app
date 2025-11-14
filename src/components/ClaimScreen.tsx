@@ -1,24 +1,25 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Modal, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Animated, Easing } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import LottieView from 'lottie-react-native';
 import { Button } from './rn/Button';
 import { Coins, PartyPopper, TrendingUp } from './rn/Icons';
 
-interface ClaimPopupProps {
+interface ClaimScreenProps {
   minedTokens: number;
   onClaim: () => void;
   loading?: boolean;
 }
 
-export function ClaimPopup({ minedTokens, onClaim, loading = false }: ClaimPopupProps) {
+export function ClaimScreen({ minedTokens, onClaim, loading = false }: ClaimScreenProps) {
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const coinAnim = useRef(new Animated.Value(0)).current;
   const [displayTokens, setDisplayTokens] = React.useState(0);
 
   useEffect(() => {
-    console.log('ClaimPopup mounted with:', { minedTokens, loading, hasOnClaim: !!onClaim });
+    console.log('ClaimScreen mounted with:', { minedTokens, loading, hasOnClaim: !!onClaim });
     
     // Animate token counter from 0 to minedTokens
     let start = 0;
@@ -40,11 +41,11 @@ export function ClaimPopup({ minedTokens, onClaim, loading = false }: ClaimPopup
   }, [minedTokens]);
 
   const handleClaim = () => {
-    console.log('ClaimPopup: Claim button pressed');
+    console.log('ClaimScreen: Claim button pressed');
     if (onClaim) {
       onClaim();
     } else {
-      console.error('ClaimPopup: onClaim is undefined!');
+      console.error('ClaimScreen: onClaim is undefined!');
     }
   };
 
@@ -103,30 +104,30 @@ export function ClaimPopup({ minedTokens, onClaim, loading = false }: ClaimPopup
   });
 
   return (
-    <Modal visible={true} transparent animationType="fade">
-      <View style={styles.overlay}>
-        <Animated.View
-          style={[
-            styles.modalContainer,
-            {
-              transform: [{ scale: scaleAnim }],
-            },
-          ]}
-        >
-          <LinearGradient
-            colors={['rgba(120, 53, 15, 0.98)', 'rgba(154, 52, 18, 0.98)']}
-            style={styles.modalContent}
-          >
-            {/* Confetti Animation */}
-            <View style={styles.confettiContainer}>
-              <LottieView
-                source={require('../assets/confetti.json')}
-                autoPlay
-                loop={true}
-                style={styles.confetti}
-              />
-            </View>
+    <LinearGradient
+      colors={['#78350f', '#9a3412', '#78350f']}
+      style={styles.container}
+    >
+      <SafeAreaView style={styles.safeArea}>
+        {/* Confetti Animation */}
+        <View style={styles.confettiContainer}>
+          <LottieView
+            source={require('../assets/confetti.json')}
+            autoPlay
+            loop={true}
+            style={styles.confetti}
+          />
+        </View>
 
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <Animated.View
+            style={[
+              styles.content,
+              {
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+          >
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.titleRow}>
@@ -204,37 +205,19 @@ export function ClaimPopup({ minedTokens, onClaim, loading = false }: ClaimPopup
               ⛏️ Tokens will be added to your balance. Start a new mining session
               after claiming!
             </Text>
-          </LinearGradient>
-        </Animated.View>
-      </View>
-    </Modal>
+          </Animated.View>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
+  container: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
   },
-  modalContainer: {
-    width: '100%',
-    maxWidth: 500,
-    borderRadius: 24,
-    overflow: 'hidden',
-  },
-  modalContent: {
-    padding: 32,
-    borderWidth: 3,
-    borderColor: 'rgba(251, 191, 36, 0.9)',
-    borderRadius: 24,
-    shadowColor: '#FBBF24',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 40,
-    // elevation: 20,
+  safeArea: {
+    flex: 1,
   },
   confettiContainer: {
     position: 'absolute',
@@ -243,15 +226,23 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     zIndex: 1,
+    pointerEvents: 'none',
   },
   confetti: {
     width: '100%',
     height: '100%',
   },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 24,
+  },
+  content: {
+    zIndex: 2,
+  },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
-    zIndex: 2,
+    marginBottom: 40,
   },
   titleRow: {
     flexDirection: 'row',
@@ -276,8 +267,7 @@ const styles = StyleSheet.create({
   },
   rewardSection: {
     alignItems: 'center',
-    marginBottom: 32,
-    zIndex: 2,
+    marginBottom: 40,
   },
   iconCircle: {
     marginBottom: 24,
@@ -292,7 +282,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
     shadowRadius: 40,
-    // elevation: 25,
+    elevation: 25,
     borderWidth: 4,
     borderColor: '#FFFFFF',
   },
@@ -363,7 +353,6 @@ const styles = StyleSheet.create({
   },
   claimButton: {
     marginBottom: 16,
-    zIndex: 2,
   },
   buttonContent: {
     flexDirection: 'row',
@@ -382,6 +371,5 @@ const styles = StyleSheet.create({
     color: '#FDE68A',
     textAlign: 'center',
     lineHeight: 20,
-    zIndex: 2,
   },
 });

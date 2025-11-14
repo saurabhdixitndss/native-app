@@ -38,6 +38,11 @@ export const getMiningStatus = async (req: Request, res: Response) => {
       session.selectedHour
     );
 
+    // Update session with current reward
+    session.totalEarned = currentReward;
+    session.currentMiningPoints = currentReward;
+    await session.save();
+
     res.json({
       session,
       status: {
