@@ -189,7 +189,7 @@ function App() {
       setCurrentScreen('claim');
     } catch (error) {
       console.error('Error getting final status:', error);
-      setShowClaimPopup(true);
+      setCurrentScreen('claim');
     }
   };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Animated, Easing, ImageBackground } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LottieView from 'lottie-react-native';
@@ -104,11 +104,16 @@ export function ClaimScreen({ minedTokens, onClaim, loading = false }: ClaimScre
   });
 
   return (
-    <LinearGradient
-      colors={['#78350f', '#9a3412', '#78350f']}
+    <ImageBackground
+      source={require('../assets/bgimage2.png')}
       style={styles.container}
+      resizeMode="cover"
     >
-      <SafeAreaView style={styles.safeArea}>
+      <LinearGradient
+        colors={['rgba(120, 53, 15, 0.9)', 'rgba(154, 52, 18, 0.9)', 'rgba(120, 53, 15, 0.9)']}
+        style={styles.overlay}
+      >
+        <SafeAreaView style={styles.safeArea}>
         {/* Confetti Animation */}
         <View style={styles.confettiContainer}>
           <LottieView
@@ -207,13 +212,17 @@ export function ClaimScreen({ minedTokens, onClaim, loading = false }: ClaimScre
             </Text>
           </Animated.View>
         </ScrollView>
-      </SafeAreaView>
-    </LinearGradient>
+        </SafeAreaView>
+      </LinearGradient>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  overlay: {
     flex: 1,
   },
   safeArea: {
@@ -251,13 +260,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#FBBF24',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
-    letterSpacing: 1.5,
+    textShadowOffset: { width: 0, height: 3 },
+    textShadowRadius: 30,
+    letterSpacing: 2,
   },
   description: {
     fontSize: 15,
@@ -273,17 +282,17 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   iconGradientCircle: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: 170,
+    height: 170,
+    borderRadius: 85,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#FBBF24',
-    shadowOffset: { width: 0, height: 0 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 1,
-    shadowRadius: 40,
-    elevation: 25,
-    borderWidth: 4,
+    shadowRadius: 50,
+    elevation: 30,
+    borderWidth: 5,
     borderColor: '#FFFFFF',
   },
   earnedSection: {
@@ -303,13 +312,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   earnedAmount: {
-    fontSize: 72,
+    fontSize: 80,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#FBBF24',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 30,
-    letterSpacing: -2,
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 40,
+    letterSpacing: -3,
   },
   tokenBadge: {
     borderRadius: 20,

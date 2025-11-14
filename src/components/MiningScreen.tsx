@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, ImageBackground } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from './rn/Button';
@@ -150,11 +150,16 @@ export function MiningScreen({ session, config, onComplete, onGoHome, onUpgradeM
   const progress = getProgress();
 
   return (
-    <LinearGradient
-      colors={['#1a0033', '#0a0a2e', '#16213e', '#000000']}
+    <ImageBackground
+      source={require('../assets/bgimage1.png')}
       style={styles.container}
+      resizeMode="cover"
     >
-      <SafeAreaView style={styles.safeArea}>
+      <LinearGradient
+        colors={['rgba(26, 0, 51, 0.85)', 'rgba(10, 10, 46, 0.85)', 'rgba(22, 33, 62, 0.85)', 'rgba(0, 0, 0, 0.9)']}
+        style={styles.overlay}
+      >
+        <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Home Button */}
           <TouchableOpacity onPress={onGoHome} style={styles.homeButton}>
@@ -261,12 +266,16 @@ export function MiningScreen({ session, config, onComplete, onGoHome, onUpgradeM
           </Card>
         </ScrollView>
       </SafeAreaView>
-    </LinearGradient>
+      </LinearGradient>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  overlay: {
     flex: 1,
   },
   safeArea: {
@@ -304,22 +313,24 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   iconGradient: {
-    padding: 16,
-    borderRadius: 24,
+    padding: 20,
+    borderRadius: 32,
     shadowColor: '#FBBF24',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
-    // elevation: 10,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 35,
+    // elevation: 18,
+    borderWidth: 4,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#8B5CF6',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 15,
-    letterSpacing: 1,
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 20,
+    letterSpacing: 2,
     textAlign: 'center',
   },
   headerSubtitle: {
@@ -351,12 +362,13 @@ const styles = StyleSheet.create({
     minWidth: 70,
   },
   timerValue: {
-    fontSize: 36,
+    fontSize: 42,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#8B5CF6',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 15,
+    letterSpacing: -1,
   },
   timerLabel: {
     fontSize: 12,
@@ -374,12 +386,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   rewardAmount: {
-    fontSize: 40,
+    fontSize: 46,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#FBBF24',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 15,
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 25,
+    letterSpacing: -1,
   },
   rewardLabel: {
     fontSize: 16,

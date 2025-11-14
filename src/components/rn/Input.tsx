@@ -20,13 +20,17 @@ export function Input({ value, onChangeText, style, ...props }: InputProps) {
 
 const styles = StyleSheet.create({
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.3)',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    backgroundColor: 'rgba(15, 15, 35, 0.8)',
+    borderWidth: 2,
+    borderColor: 'rgba(139, 92, 246, 0.5)',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     fontSize: 16,
     color: '#FFFFFF',
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
 });

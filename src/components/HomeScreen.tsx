@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ImageBackground, Animated } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from './rn/Button';
@@ -22,6 +22,27 @@ export function HomeScreen({
   onRefresh,
   onLogout
 }: HomeScreenProps) {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (hasActiveSession) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.3,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }
+  }, [hasActiveSession]);
+
   if (!user) return null;
 
   const handleLogout = () => {
@@ -39,11 +60,16 @@ export function HomeScreen({
     );
   };
   return (
-    <LinearGradient
-      colors={['#1a0033', '#0a0a2e', '#16213e', '#000000']}
+    <ImageBackground
+      source={require('../assets/bgimage1.png')}
       style={styles.container}
+      resizeMode="cover"
     >
-      <SafeAreaView style={styles.safeArea}>
+      <LinearGradient
+        colors={['rgba(26, 0, 51, 0.85)', 'rgba(10, 10, 46, 0.85)', 'rgba(22, 33, 62, 0.85)', 'rgba(0, 0, 0, 0.9)']}
+        style={styles.overlay}
+      >
+        <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Header with Logout */}
           <View style={styles.headerContainer}>
@@ -72,7 +98,7 @@ export function HomeScreen({
             <CardHeader>
               <View style={styles.cardTitleRow}>
                 <Wallet size={20} color="#FFFFFF" />
-                <CardTitle>Wallet</CardTitle>
+                <CardTitle>Wallet Address</CardTitle>
               </View>
             </CardHeader>
             <CardContent>
@@ -106,9 +132,10 @@ export function HomeScreen({
             </CardHeader>
             <CardContent>
               <View style={styles.statusRow}>
-                <View style={[
+                <Animated.View style={[
                   styles.statusDot,
-                  hasActiveSession ? styles.statusDotActive : styles.statusDotIdle
+                  hasActiveSession ? styles.statusDotActive : styles.statusDotIdle,
+                  hasActiveSession && { transform: [{ scale: pulseAnim }] }
                 ]} />
                 <Text style={styles.statusText}>
                   {hasActiveSession ? 'Mining Active' : 'Ready to Mine'}
@@ -161,12 +188,16 @@ export function HomeScreen({
           </View>
         </ScrollView>
       </SafeAreaView>
-    </LinearGradient>
+      </LinearGradient>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  overlay: {
     flex: 1,
   },
   safeArea: {
@@ -205,22 +236,24 @@ const styles = StyleSheet.create({
     color: '#EF4444',
   },
   iconGradient: {
-    padding: 12,
-    borderRadius: 20,
+    padding: 16,
+    borderRadius: 28,
     shadowColor: '#FBBF24',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
-    // elevation: 10,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 30,
+    // elevation: 15,
+    borderWidth: 3,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   headerTitle: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#8B5CF6',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 15,
-    letterSpacing: 1,
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 20,
+    letterSpacing: 2,
   },
   card: {
     marginBottom: 0,
@@ -244,20 +277,22 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   balanceAmount: {
-    fontSize: 40,
+    fontSize: 48,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#FBBF24',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 15,
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 25,
+    letterSpacing: -1,
   },
   balanceLabel: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '800',
     color: '#FBBF24',
     textShadowColor: '#F97316',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 15,
+    letterSpacing: 2,
   },
   statusRow: {
     flexDirection: 'row',
@@ -275,8 +310,10 @@ const styles = StyleSheet.create({
     shadowColor: '#4ADE80',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
-    shadowRadius: 10,
-    // elevation: 5,
+    shadowRadius: 15,
+    // elevation: 8,
+    borderWidth: 2,
+    borderColor: 'rgba(74, 222, 128, 0.5)',
   },
   statusDotCompleted: {
     backgroundColor: '#FBBF24',

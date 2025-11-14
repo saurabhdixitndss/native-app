@@ -93,19 +93,19 @@ export function Button({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
   },
   shadow: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    // elevation: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    // elevation: 10,
   },
   gradient: {
-    paddingVertical: 14,
-    paddingHorizontal: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -129,10 +129,10 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   text: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     textAlign: 'center',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
   defaultText: {
     color: '#FFFFFF',
@@ -142,11 +142,11 @@ const styles = StyleSheet.create({
   },
   gradientText: {
     color: '#000000',
-    fontWeight: '800',
+    fontWeight: '900',
   },
   textShadow: {
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
 });

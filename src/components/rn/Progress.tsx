@@ -58,22 +58,22 @@ export function Progress({ value, style }: ProgressProps) {
 
 const styles = StyleSheet.create({
   container: {
-    height: 16,
-    backgroundColor: 'rgba(139, 92, 246, 0.2)',
-    borderRadius: 8,
+    height: 20,
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    borderRadius: 12,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.4)',
+    borderWidth: 2,
+    borderColor: 'rgba(139, 92, 246, 0.5)',
   },
   progressWrapper: {
     height: '100%',
   },
   progress: {
     height: '100%',
-    borderRadius: 8,
+    borderRadius: 10,
     shadowColor: '#8B5CF6',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 8,
+    shadowOpacity: 1,
+    shadowRadius: 12,
   },
 });

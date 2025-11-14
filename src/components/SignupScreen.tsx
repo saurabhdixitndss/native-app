@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ImageBackground } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from './rn/Button';
@@ -31,11 +31,16 @@ export function SignupScreen({ onSignup, loading = false }: SignupScreenProps) {
   };
 
   return (
-    <LinearGradient
-      colors={['#1a0033', '#0a0a2e', '#000000']}
+    <ImageBackground
+      source={require('../assets/bgimage2.png')}
       style={styles.container}
+      resizeMode="cover"
     >
-      <SafeAreaView style={styles.safeArea}>
+      <LinearGradient
+        colors={['rgba(26, 0, 51, 0.9)', 'rgba(10, 10, 46, 0.9)', 'rgba(0, 0, 0, 0.95)']}
+        style={styles.overlay}
+      >
+        <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardView}
@@ -90,12 +95,16 @@ export function SignupScreen({ onSignup, loading = false }: SignupScreenProps) {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </LinearGradient>
+      </LinearGradient>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  overlay: {
     flex: 1,
   },
   safeArea: {
@@ -121,23 +130,26 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   iconGradient: {
-    padding: 16,
-    borderRadius: 20,
+    padding: 20,
+    borderRadius: 30,
     shadowColor: '#FBBF24',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
-    // elevation: 10,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 35,
+    // elevation: 15,
+    borderWidth: 4,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
   },
   title: {
     textAlign: 'center',
     marginBottom: 8,
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#8B5CF6',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 15,
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 20,
+    letterSpacing: 2,
   },
   description: {
     textAlign: 'center',
