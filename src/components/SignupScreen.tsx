@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 16,
+    padding: 24,
   },
   card: {
     maxWidth: 500,
@@ -137,19 +137,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 35,
     // elevation: 15,
-    borderWidth: 4,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
   },
   title: {
     textAlign: 'center',
     marginBottom: 8,
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#8B5CF6',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 20,
-    letterSpacing: 2,
+    textShadowOffset: { width: 0, height: 3 },
+    textShadowRadius: 25,
+    letterSpacing: 4,
+    textTransform: 'uppercase',
   },
   description: {
     textAlign: 'center',

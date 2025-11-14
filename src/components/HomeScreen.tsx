@@ -70,7 +70,7 @@ export function HomeScreen({
         style={styles.overlay}
       >
         <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.content}>
           {/* Header with Logout */}
           <View style={styles.headerContainer}>
             <View style={styles.header}>
@@ -78,7 +78,7 @@ export function HomeScreen({
                 colors={['#FBBF24', '#F97316', '#EF4444']}
                 style={styles.iconGradient}
               >
-                <Pickaxe size={40} color="#FFFFFF" />
+                <Pickaxe size={36} color="#FFFFFF" />
               </LinearGradient>
               <Text style={styles.headerTitle}>⚡ CRYPTO MINER ⚡</Text>
             </View>
@@ -87,106 +87,99 @@ export function HomeScreen({
                 colors={['rgba(239, 68, 68, 0.2)', 'rgba(220, 38, 38, 0.2)']}
                 style={styles.logoutGradient}
               >
-                <LogOut size={20} color="#EF4444" />
+                <LogOut size={18} color="#EF4444" />
                 <Text style={styles.logoutText}>Logout</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
 
-          {/* Wallet Info */}
-          <Card style={styles.card}>
-            <CardHeader>
-              <View style={styles.cardTitleRow}>
-                <Wallet size={20} color="#FFFFFF" />
-                <CardTitle>Wallet Address</CardTitle>
-              </View>
-            </CardHeader>
-            <CardContent>
+          {/* Wallet Info - Compact */}
+          <Card style={styles.walletCard}>
+            <CardContent style={styles.walletContent}>
+              <Wallet size={18} color="#8B5CF6" />
               <Text style={styles.walletAddress}>{user.walletAddress}</Text>
             </CardContent>
           </Card>
 
-          {/* Balance */}
-          <Card style={StyleSheet.flatten([styles.card, styles.balanceCard])} glow>
-            <CardHeader>
-              <View style={styles.cardTitleRow}>
-                <Coins size={20} color="#FBBF24" />
-                <CardTitle>💰 Balance</CardTitle>
+          {/* Balance - Prominent */}
+          <Card style={styles.balanceCard} glow>
+            <CardContent style={styles.balanceContent}>
+              <View style={styles.balanceHeader}>
+                <Coins size={24} color="#FBBF24" />
+                <Text style={styles.balanceTitle}>💰 BALANCE</Text>
               </View>
-            </CardHeader>
-            <CardContent>
-              <View style={styles.balanceRow}>
-                <Text style={styles.balanceAmount}>🪙 {user.totalTokens.toFixed(2)}</Text>
-                <Text style={styles.balanceLabel}>TOKENS</Text>
+              <View style={styles.balanceAmountContainer}>
+                <Text style={styles.balanceAmount}>{user.totalTokens.toFixed(2)}</Text>
               </View>
+              <Text style={styles.balanceLabel}>TOKENS</Text>
             </CardContent>
           </Card>
 
-          {/* Mining Status */}
-          <Card style={styles.card}>
-            <CardHeader>
-              <View style={styles.cardTitleRow}>
-                <TrendingUp size={20} color="#FFFFFF" />
-                <CardTitle>Mining Status</CardTitle>
-              </View>
-            </CardHeader>
-            <CardContent>
-              <View style={styles.statusRow}>
-                <Animated.View style={[
-                  styles.statusDot,
-                  hasActiveSession ? styles.statusDotActive : styles.statusDotIdle,
-                  hasActiveSession && { transform: [{ scale: pulseAnim }] }
-                ]} />
-                <Text style={styles.statusText}>
-                  {hasActiveSession ? 'Mining Active' : 'Ready to Mine'}
-                </Text>
-              </View>
+          {/* Mining Status - Game Style */}
+          <LinearGradient
+            colors={hasActiveSession 
+              ? ['rgba(74, 222, 128, 0.3)', 'rgba(34, 197, 94, 0.2)']
+              : ['rgba(107, 114, 128, 0.3)', 'rgba(75, 85, 99, 0.2)']
+            }
+            style={styles.statusCard}
+          >
+            <Text style={styles.statusIcon}>{hasActiveSession ? '⛏️' : '💤'}</Text>
+            <Text style={styles.statusLabel}>MINING STATUS</Text>
+            <View style={styles.statusIndicator}>
+              <Animated.View style={[
+                styles.statusDot,
+                hasActiveSession ? styles.statusDotActive : styles.statusDotIdle,
+                hasActiveSession && { transform: [{ scale: pulseAnim }] }
+              ]} />
+              <Text style={styles.statusValue}>
+                {hasActiveSession ? 'Active' : 'Idle'}
+              </Text>
+            </View>
+            {hasActiveSession && (
+              <Text style={styles.statusSubtext}>session running</Text>
+            )}
+          </LinearGradient>
 
-              {hasActiveSession && (
-                <Text style={styles.miningNote}>
-                  ⛏️ You have an active mining session running in the background
-                </Text>
-              )}
+          {/* Action Button */}
+          <Button 
+            onPress={onStartMining}
+            gradient={hasActiveSession ? ['#FBBF24', '#F97316'] : ['#8B5CF6', '#3B82F6']}
+            style={styles.actionButton}
+          >
+            <View style={styles.buttonContent}>
+              <Pickaxe size={20} color={hasActiveSession ? '#000000' : '#FFFFFF'} />
+              <Text style={[
+                styles.buttonText,
+                hasActiveSession ? styles.buttonTextBlack : styles.buttonTextWhite
+              ]}>
+                {hasActiveSession ? 'CONTINUE MINING' : 'START MINING'}
+              </Text>
+            </View>
+          </Button>
 
-              <Button 
-                onPress={onStartMining}
-                gradient={hasActiveSession ? ['#FBBF24', '#F97316'] : ['#8B5CF6', '#3B82F6']}
-                style={styles.actionButton}
-              >
-                <View style={styles.buttonContent}>
-                  <Pickaxe size={16} color={hasActiveSession ? '#000000' : '#FFFFFF'} />
-                  <Text style={[
-                    styles.buttonText,
-                    hasActiveSession ? styles.buttonTextBlack : styles.buttonTextWhite
-                  ]}>
-                    {hasActiveSession ? 'Continue Mining' : 'Start Mining'}
-                  </Text>
-                </View>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Info Cards */}
+          {/* Info Cards - Game Style */}
           <View style={styles.infoGrid}>
-            <Card style={styles.infoCard}>
-              <CardContent style={styles.infoCardContent}>
-                <Text style={styles.infoLabel}>Base Rate</Text>
-                <Text style={styles.infoValue}>
-                  0.01 <Text style={styles.infoUnit}>tokens/sec</Text>
-                </Text>
-              </CardContent>
-            </Card>
+            <LinearGradient
+              colors={['rgba(139, 92, 246, 0.3)', 'rgba(59, 130, 246, 0.2)']}
+              style={styles.infoCard}
+            >
+              <Text style={styles.infoIcon}>⚡</Text>
+              <Text style={styles.infoLabel}>BASE RATE</Text>
+              <Text style={styles.infoValue}>0.01</Text>
+              <Text style={styles.infoUnit}>tokens/sec</Text>
+            </LinearGradient>
             
-            <Card style={styles.infoCard}>
-              <CardContent style={styles.infoCardContent}>
-                <Text style={styles.infoLabel}>Max Multiplier</Text>
-                <Text style={styles.infoValue}>
-                  6<Text style={styles.infoUnit}>x</Text>
-                </Text>
-              </CardContent>
-            </Card>
+            <LinearGradient
+              colors={['rgba(251, 191, 36, 0.3)', 'rgba(249, 115, 22, 0.2)']}
+              style={styles.infoCard}
+            >
+              <Text style={styles.infoIcon}>🚀</Text>
+              <Text style={styles.infoLabel}>MAX BOOST</Text>
+              <Text style={styles.infoValue}>6×</Text>
+              <Text style={styles.infoUnit}>multiplier</Text>
+            </LinearGradient>
           </View>
-        </ScrollView>
+        </View>
       </SafeAreaView>
       </LinearGradient>
     </ImageBackground>
@@ -203,17 +196,17 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  scrollContent: {
+  content: {
+    flex: 1,
     padding: 16,
-    paddingTop: 16,
-    gap: 24,
+    gap: 14,
   },
   headerContainer: {
-    gap: 16,
+    gap: 10,
   },
   header: {
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
   },
   logoutButton: {
     alignSelf: 'flex-end',
@@ -236,102 +229,135 @@ const styles = StyleSheet.create({
     color: '#EF4444',
   },
   iconGradient: {
-    padding: 16,
-    borderRadius: 28,
+    padding: 12,
+    borderRadius: 24,
     shadowColor: '#FBBF24',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
-    shadowRadius: 30,
+    shadowRadius: 25,
     // elevation: 15,
-    borderWidth: 3,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#8B5CF6',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 20,
-    letterSpacing: 2,
-  },
-  card: {
-    marginBottom: 0,
-  },
-  balanceCard: {
-    borderColor: 'rgba(251, 191, 36, 0.3)',
-    backgroundColor: 'rgba(120, 53, 15, 0.2)',
-  },
-  cardTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  walletAddress: {
-    fontSize: 14,
-    color: '#9CA3AF',
-  },
-  balanceRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 8,
-  },
-  balanceAmount: {
-    fontSize: 48,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    textShadowColor: '#FBBF24',
-    textShadowOffset: { width: 0, height: 2 },
+    textShadowOffset: { width: 0, height: 3 },
     textShadowRadius: 25,
-    letterSpacing: -1,
+    letterSpacing: 4,
+    textTransform: 'uppercase',
   },
-  balanceLabel: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#FBBF24',
-    textShadowColor: '#F97316',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 15,
-    letterSpacing: 2,
+  walletCard: {
+    backgroundColor: 'rgba(15, 15, 35, 0.7)',
   },
-  statusRow: {
+  walletContent: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginBottom: 16,
+    paddingVertical: 12,
+  },
+  walletAddress: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#D1D5DB',
+    letterSpacing: 1,
+    flex: 1,
+  },
+  balanceCard: {
+    borderColor: 'rgba(251, 191, 36, 0.5)',
+    backgroundColor: 'rgba(120, 53, 15, 0.3)',
+  },
+  balanceContent: {
+    alignItems: 'center',
+    paddingVertical: 16,
+    gap: 8,
+  },
+  balanceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  balanceTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#FBBF24',
+    letterSpacing: 3,
+    textTransform: 'uppercase',
+  },
+  balanceAmountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  balanceAmount: {
+    fontSize: 64,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    textShadowColor: '#FBBF24',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 35,
+    letterSpacing: -2,
+  },
+  balanceLabel: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#FBBF24',
+    textShadowColor: '#F97316',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 18,
+    letterSpacing: 4,
+    textTransform: 'uppercase',
+  },
+  statusCard: {
+    borderRadius: 20,
+    padding: 16,
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  statusIcon: {
+    fontSize: 32,
+  },
+  statusLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#D1D5DB',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+  },
+  statusIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
   statusDotActive: {
     backgroundColor: '#4ADE80',
     shadowColor: '#4ADE80',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
-    shadowRadius: 15,
+    shadowRadius: 12,
     // elevation: 8,
-    borderWidth: 2,
-    borderColor: 'rgba(74, 222, 128, 0.5)',
-  },
-  statusDotCompleted: {
-    backgroundColor: '#FBBF24',
   },
   statusDotIdle: {
     backgroundColor: '#6B7280',
   },
-  statusText: {
-    fontSize: 16,
-    color: '#D1D5DB',
+  statusValue: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(255, 255, 255, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 10,
   },
-  miningNote: {
-    fontSize: 13,
-    color: '#FBBF24',
-    marginTop: 8,
-    marginBottom: 8,
-    textAlign: 'center',
-    fontStyle: 'italic',
+  statusSubtext: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#9CA3AF',
   },
   actionButton: {
     marginTop: 0,
@@ -342,9 +368,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 17,
+    fontWeight: '800',
     color: '#000000',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
   },
   buttonTextWhite: {
     color: '#FFFFFF',
@@ -354,27 +382,38 @@ const styles = StyleSheet.create({
   },
   infoGrid: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
   },
   infoCard: {
     flex: 1,
-  },
-  infoCardContent: {
-    paddingTop: 24,
+    borderRadius: 20,
+    padding: 16,
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  infoIcon: {
+    fontSize: 32,
   },
   infoLabel: {
-    fontSize: 14,
-    color: '#9CA3AF',
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#D1D5DB',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
   },
   infoValue: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 28,
+    fontWeight: '900',
     color: '#FFFFFF',
+    textShadowColor: 'rgba(255, 255, 255, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 10,
   },
   infoUnit: {
-    fontSize: 14,
+    fontSize: 11,
+    fontWeight: '600',
     color: '#9CA3AF',
   },
 });

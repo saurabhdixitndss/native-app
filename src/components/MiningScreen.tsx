@@ -160,111 +160,114 @@ export function MiningScreen({ session, config, onComplete, onGoHome, onUpgradeM
         style={styles.overlay}
       >
         <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Home Button */}
-          <TouchableOpacity onPress={onGoHome} style={styles.homeButton}>
-            <LinearGradient
-              colors={['rgba(139, 92, 246, 0.2)', 'rgba(59, 130, 246, 0.2)']}
-              style={styles.homeGradient}
-            >
-              <Home size={20} color="#8B5CF6" />
-              <Text style={styles.homeText}>Home</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <View style={styles.header}>
-            <LinearGradient
-              colors={['#FBBF24', '#F97316', '#EF4444']}
-              style={styles.iconGradient}
-            >
-              <Pickaxe size={48} color="#FFFFFF" />
-            </LinearGradient>
-            <Text style={styles.headerTitle}>⛏️ MINING IN PROGRESS ⛏️</Text>
-            <Text style={styles.headerSubtitle}>💎 Your tokens are being generated... 💎</Text>
+        <View style={styles.content}>
+          {/* Header with Home Button */}
+          <View style={styles.headerContainer}>
+            <View style={styles.header}>
+              <LinearGradient
+                colors={['#FBBF24', '#F97316', '#EF4444']}
+                style={styles.iconGradient}
+              >
+                <Pickaxe size={36} color="#FFFFFF" />
+              </LinearGradient>
+              <Text style={styles.headerTitle}>⛏️ MINING ⛏️</Text>
+            </View>
+            <TouchableOpacity onPress={onGoHome} style={styles.homeButton}>
+              <LinearGradient
+                colors={['rgba(139, 92, 246, 0.2)', 'rgba(59, 130, 246, 0.2)']}
+                style={styles.homeGradient}
+              >
+                <Home size={18} color="#8B5CF6" />
+                <Text style={styles.homeText}>Home</Text>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
 
-          <Card style={styles.card}>
-            <CardHeader>
-              <View style={styles.cardTitleCenter}>
-                <Clock size={20} color="#FFFFFF" />
-                <CardTitle>Time Remaining</CardTitle>
+          {/* Timer - Compact */}
+          <Card style={styles.timerCard}>
+            <CardContent style={styles.timerContent}>
+              <View style={styles.timerHeader}>
+                <Clock size={18} color="#8B5CF6" />
+                <Text style={styles.timerTitle}>TIME REMAINING</Text>
               </View>
-            </CardHeader>
-            <CardContent>
               <View style={styles.timerContainer}>
                 <View style={styles.timerUnit}>
                   <Text style={styles.timerValue}>{String(hours).padStart(2, '0')}</Text>
-                  <Text style={styles.timerLabel}>Hours</Text>
+                  <Text style={styles.timerLabel}>H</Text>
                 </View>
                 <Text style={styles.timerSeparator}>:</Text>
                 <View style={styles.timerUnit}>
                   <Text style={styles.timerValue}>{String(minutes).padStart(2, '0')}</Text>
-                  <Text style={styles.timerLabel}>Minutes</Text>
+                  <Text style={styles.timerLabel}>M</Text>
                 </View>
                 <Text style={styles.timerSeparator}>:</Text>
                 <View style={styles.timerUnit}>
                   <Text style={styles.timerValue}>{String(secs).padStart(2, '0')}</Text>
-                  <Text style={styles.timerLabel}>Seconds</Text>
+                  <Text style={styles.timerLabel}>S</Text>
                 </View>
               </View>
             </CardContent>
           </Card>
 
-          <Card style={StyleSheet.flatten([styles.card, styles.rewardCard])} glow>
-            <CardHeader>
-              <View style={styles.cardTitleCenter}>
-                <Coins size={20} color="#FBBF24" />
-                <CardTitle>💰 Tokens Mined</CardTitle>
+          {/* Tokens Mined - Prominent */}
+          <Card style={styles.rewardCard} glow>
+            <CardContent style={styles.rewardContent}>
+              <View style={styles.rewardHeader}>
+                <Coins size={24} color="#FBBF24" />
+                <Text style={styles.rewardTitle}>💰 TOKENS MINED</Text>
               </View>
-            </CardHeader>
-            <CardContent>
-              <View style={styles.rewardContainer}>
-                <Text style={styles.rewardAmount}>🪙 {currentReward.toFixed(4)}</Text>
-                <Text style={styles.rewardLabel}>TOKENS</Text>
-              </View>
+              <Text style={styles.rewardAmount}>{currentReward.toFixed(2)}</Text>
+              <Text style={styles.rewardLabel}>TOKENS</Text>
               <Progress value={progress} style={styles.progress} />
               <Text style={styles.progressText}>{progress.toFixed(1)}% Complete</Text>
             </CardContent>
           </Card>
 
-          <Card style={styles.card}>
-            <CardHeader>
-              <View style={styles.cardTitleCenter}>
-                <Zap size={20} color="#FBBF24" />
-                <CardTitle>Mining Details</CardTitle>
-              </View>
-            </CardHeader>
-            <CardContent>
-              <View style={styles.detailsGrid}>
-                <View style={styles.detailItem}>
-                  <Text style={styles.detailLabel}>Duration</Text>
-                  <Text style={styles.detailValue}>{currentSession.selectedHour}h</Text>
-                </View>
-                <View style={styles.detailItem}>
-                  <Text style={styles.detailLabel}>Multiplier</Text>
-                  <Text style={styles.detailValue}>{currentSession.multiplier}×</Text>
-                </View>
-                <View style={styles.detailItem}>
-                  <Text style={styles.detailLabel}>Rate</Text>
-                  <Text style={styles.detailValue}>
-                    {config ? (config.baseRate * currentSession.multiplier).toFixed(4) : '0.00'}/s
-                  </Text>
-                </View>
-              </View>
+          {/* Mining Details - Game Style */}
+          <View style={styles.detailsGrid}>
+            <LinearGradient
+              colors={['rgba(139, 92, 246, 0.3)', 'rgba(59, 130, 246, 0.2)']}
+              style={styles.detailCard}
+            >
+              <Text style={styles.detailIcon}>⏱️</Text>
+              <Text style={styles.detailLabel}>DURATION</Text>
+              <Text style={styles.detailValue}>{currentSession.selectedHour}h</Text>
+            </LinearGradient>
+            
+            <LinearGradient
+              colors={['rgba(251, 191, 36, 0.3)', 'rgba(249, 115, 22, 0.2)']}
+              style={styles.detailCard}
+            >
+              <Text style={styles.detailIcon}>⚡</Text>
+              <Text style={styles.detailLabel}>MULTIPLIER</Text>
+              <Text style={styles.detailValue}>{currentSession.multiplier}×</Text>
+            </LinearGradient>
+            
+            <LinearGradient
+              colors={['rgba(34, 197, 94, 0.3)', 'rgba(22, 163, 74, 0.2)']}
+              style={styles.detailCard}
+            >
+              <Text style={styles.detailIcon}>🚀</Text>
+              <Text style={styles.detailLabel}>RATE</Text>
+              <Text style={styles.detailValue}>
+                {config ? (config.baseRate * currentSession.multiplier).toFixed(3) : '0.00'}
+              </Text>
+              <Text style={styles.detailUnit}>tokens/s</Text>
+            </LinearGradient>
+          </View>
 
-              <Button
-                onPress={handleUpgrade}
-                gradient={['#8B5CF6', '#3B82F6']}
-                style={styles.upgradeButton}
-              >
-                <View style={styles.buttonContent}>
-                  <Zap size={16} color="#FFFFFF" />
-                  <Text style={styles.buttonText}>Upgrade Multiplier</Text>
-                </View>
-              </Button>
-            </CardContent>
-          </Card>
-        </ScrollView>
+          {/* Upgrade Button */}
+          <Button
+            onPress={handleUpgrade}
+            gradient={['#8B5CF6', '#3B82F6']}
+            style={styles.upgradeButton}
+          >
+            <View style={styles.buttonContent}>
+              <Zap size={20} color="#FFFFFF" />
+              <Text style={styles.buttonText}>UPGRADE MULTIPLIER</Text>
+            </View>
+          </Button>
+        </View>
       </SafeAreaView>
       </LinearGradient>
     </ImageBackground>
@@ -281,16 +284,18 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  scrollContent: {
+  content: {
+    flex: 1,
     padding: 16,
-    paddingTop: 16,
-    gap: 24,
+    gap: 14,
+  },
+  headerContainer: {
+    gap: 10,
   },
   homeButton: {
     alignSelf: 'flex-end',
     borderRadius: 12,
     overflow: 'hidden',
-    marginBottom: 8,
   },
   homeGradient: {
     flexDirection: 'row',
@@ -309,96 +314,115 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 8,
+    gap: 8,
   },
   iconGradient: {
-    padding: 20,
-    borderRadius: 32,
+    padding: 12,
+    borderRadius: 24,
     shadowColor: '#FBBF24',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
-    shadowRadius: 35,
-    // elevation: 18,
-    borderWidth: 4,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    shadowRadius: 25,
+    // elevation: 15,
   },
   headerTitle: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#8B5CF6',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 20,
-    letterSpacing: 2,
+    textShadowOffset: { width: 0, height: 3 },
+    textShadowRadius: 25,
+    letterSpacing: 4,
     textAlign: 'center',
+    textTransform: 'uppercase',
   },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#D1D5DB',
-    textAlign: 'center',
+  timerCard: {
+    backgroundColor: 'rgba(15, 15, 35, 0.7)',
   },
-  card: {
-    marginBottom: 0,
+  timerContent: {
+    paddingVertical: 12,
+    gap: 8,
   },
-  rewardCard: {
-    borderColor: 'rgba(251, 191, 36, 0.3)',
-    backgroundColor: 'rgba(120, 53, 15, 0.2)',
-  },
-  cardTitleCenter: {
+  timerHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+  },
+  timerTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+  },
+  rewardCard: {
+    borderColor: 'rgba(251, 191, 36, 0.5)',
+    backgroundColor: 'rgba(120, 53, 15, 0.3)',
+  },
+  rewardContent: {
+    alignItems: 'center',
+    paddingVertical: 16,
+    gap: 8,
+  },
+  rewardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  rewardTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#FBBF24',
+    letterSpacing: 3,
+    textTransform: 'uppercase',
   },
   timerContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   timerUnit: {
     alignItems: 'center',
-    minWidth: 70,
+    minWidth: 50,
   },
   timerValue: {
-    fontSize: 42,
+    fontSize: 36,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#8B5CF6',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 15,
-    letterSpacing: -1,
+    letterSpacing: 1,
   },
   timerLabel: {
-    fontSize: 12,
+    fontSize: 10,
+    fontWeight: '700',
     color: '#9CA3AF',
-    marginTop: 4,
+    marginTop: 2,
   },
   timerSeparator: {
-    fontSize: 36,
+    fontSize: 28,
     fontWeight: '900',
     color: '#8B5CF6',
-    marginBottom: 20,
-  },
-  rewardContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   rewardAmount: {
-    fontSize: 46,
+    fontSize: 56,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#FBBF24',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 25,
-    letterSpacing: -1,
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 35,
+    letterSpacing: -2,
   },
   rewardLabel: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '900',
     color: '#FBBF24',
-    marginTop: 4,
+    letterSpacing: 4,
+    textTransform: 'uppercase',
   },
   progress: {
     marginTop: 8,
@@ -411,24 +435,42 @@ const styles = StyleSheet.create({
   },
   detailsGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 16,
+    gap: 10,
   },
-  detailItem: {
+  detailCard: {
+    flex: 1,
+    borderRadius: 16,
+    padding: 12,
     alignItems: 'center',
     gap: 4,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  detailIcon: {
+    fontSize: 24,
   },
   detailLabel: {
-    fontSize: 12,
-    color: '#9CA3AF',
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#D1D5DB',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   detailValue: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '900',
     color: '#FFFFFF',
+    textShadowColor: 'rgba(255, 255, 255, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 10,
+  },
+  detailUnit: {
+    fontSize: 9,
+    fontWeight: '600',
+    color: '#9CA3AF',
   },
   upgradeButton: {
-    marginTop: 8,
+    marginTop: 0,
   },
   buttonContent: {
     flexDirection: 'row',
@@ -436,8 +478,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 17,
+    fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
   },
 });

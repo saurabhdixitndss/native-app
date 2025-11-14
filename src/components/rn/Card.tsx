@@ -53,16 +53,17 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
   },
   header: {
-    padding: 20,
+    padding: 24,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '800',
     color: '#FFFFFF',
-    letterSpacing: 0.5,
-    textShadowColor: 'rgba(139, 92, 246, 0.5)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    letterSpacing: 1.5,
+    textShadowColor: 'rgba(139, 92, 246, 0.6)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 12,
+    textTransform: 'uppercase',
   },
   description: {
     fontSize: 14,
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   content: {
-    padding: 20,
+    padding: 24,
     paddingTop: 0,
   },
 });

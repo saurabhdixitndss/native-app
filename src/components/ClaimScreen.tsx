@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 24,
+    padding: 28,
   },
   content: {
     zIndex: 2,
@@ -260,13 +260,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#FBBF24',
-    textShadowOffset: { width: 0, height: 3 },
-    textShadowRadius: 30,
-    letterSpacing: 2,
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 35,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
   },
   description: {
     fontSize: 15,
@@ -292,8 +293,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 50,
     elevation: 30,
-    borderWidth: 5,
-    borderColor: '#FFFFFF',
   },
   earnedSection: {
     alignItems: 'center',
@@ -312,13 +311,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   earnedAmount: {
-    fontSize: 80,
+    fontSize: 88,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#FBBF24',
-    textShadowOffset: { width: 0, height: 4 },
-    textShadowRadius: 40,
-    letterSpacing: -3,
+    textShadowOffset: { width: 0, height: 5 },
+    textShadowRadius: 45,
+    letterSpacing: -2,
   },
   tokenBadge: {
     borderRadius: 20,
@@ -332,10 +331,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   tokenLabel: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '900',
     color: '#000000',
-    letterSpacing: 1,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
   },
   statsContainer: {
     marginTop: 24,
