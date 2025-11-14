@@ -42,13 +42,15 @@ export function Progress({ value, style }: ProgressProps) {
 
   return (
     <View style={[styles.container, style]}>
-      <Animated.View style={[styles.progressWrapper, { width, transform: [{ scaleY: pulseAnim }] }]}>
-        <LinearGradient
-          colors={['#8B5CF6', '#EC4899', '#F59E0B']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.progress}
-        />
+      <Animated.View style={[styles.progressWrapper, { width }]}>
+        <Animated.View style={{ transform: [{ scaleY: pulseAnim }], height: '100%' }}>
+          <LinearGradient
+            colors={['#8B5CF6', '#EC4899', '#F59E0B']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.progress}
+          />
+        </Animated.View>
       </Animated.View>
     </View>
   );
