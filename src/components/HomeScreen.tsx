@@ -1,27 +1,41 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from './rn/Button';
 import { Card, CardContent, CardHeader, CardTitle } from './rn/Card';
-import { Wallet, Pickaxe, TrendingUp, Coins } from './rn/Icons';
-import type { UserData } from '../../App';
+import { Wallet, Pickaxe, TrendingUp, Coins, LogOut } from './rn/Icons';
+import type { User } from '../services/api';
 
 interface HomeScreenProps {
-  user: UserData;
-  miningStatus: 'idle' | 'mining' | 'completed';
+  user: User | null;
   onStartMining: () => void;
-  onClaimRewards: () => void;
-  hasRewardsToClaim: boolean;
+  onRefresh: () => void;
+  onLogout: () => void;
 }
 
 export function HomeScreen({ 
   user, 
-  miningStatus, 
-  onStartMining, 
-  onClaimRewards,
-  hasRewardsToClaim 
+  onStartMining,
+  onRefresh,
+  onLogout
 }: HomeScreenProps) {
+  if (!user) return null;
+
+  const handleLogout = () => {
+    Alert.alert(
+      '🚪 Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: onLogout,
+        },
+      ]
+    );
+  };
   return (
     <LinearGradient
       colors={['#1a0033', '#0a0a2e', '#16213e', '#000000']}
@@ -29,15 +43,26 @@ export function HomeScreen({
     >
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Header */}
-          <View style={styles.header}>
-            <LinearGradient
-              colors={['#FBBF24', '#F97316', '#EF4444']}
-              style={styles.iconGradient}
-            >
-              <Pickaxe size={40} color="#FFFFFF" />
-            </LinearGradient>
-            <Text style={styles.headerTitle}>⚡ CRYPTO MINER ⚡</Text>
+          {/* Header with Logout */}
+          <View style={styles.headerContainer}>
+            <View style={styles.header}>
+              <LinearGradient
+                colors={['#FBBF24', '#F97316', '#EF4444']}
+                style={styles.iconGradient}
+              >
+                <Pickaxe size={40} color="#FFFFFF" />
+              </LinearGradient>
+              <Text style={styles.headerTitle}>⚡ CRYPTO MINER ⚡</Text>
+            </View>
+            <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+              <LinearGradient
+                colors={['rgba(239, 68, 68, 0.2)', 'rgba(220, 38, 38, 0.2)']}
+                style={styles.logoutGradient}
+              >
+                <LogOut size={20} color="#EF4444" />
+                <Text style={styles.logoutText}>Logout</Text>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
 
           {/* Wallet Info */}
@@ -63,7 +88,7 @@ export function HomeScreen({
             </CardHeader>
             <CardContent>
               <View style={styles.balanceRow}>
-                <Text style={styles.balanceAmount}>🪙 {user.balance.toFixed(2)}</Text>
+                <Text style={styles.balanceAmount}>🪙 {user.totalTokens.toFixed(2)}</Text>
                 <Text style={styles.balanceLabel}>TOKENS</Text>
               </View>
             </CardContent>
@@ -79,43 +104,20 @@ export function HomeScreen({
             </CardHeader>
             <CardContent>
               <View style={styles.statusRow}>
-                <View style={[
-                  styles.statusDot,
-                  miningStatus === 'mining' && styles.statusDotActive,
-                  miningStatus === 'completed' && styles.statusDotCompleted,
-                  miningStatus === 'idle' && styles.statusDotIdle,
-                ]} />
-                <Text style={styles.statusText}>
-                  {miningStatus === 'mining' ? 'Mining Active' : 
-                   miningStatus === 'completed' ? 'Ready to Claim' : 
-                   'Inactive'}
-                </Text>
+                <View style={[styles.statusDot, styles.statusDotIdle]} />
+                <Text style={styles.statusText}>Ready to Mine</Text>
               </View>
 
-              {hasRewardsToClaim ? (
-                <Button 
-                  onPress={onClaimRewards}
-                  gradient={['#FBBF24', '#F97316']}
-                  style={styles.actionButton}
-                >
-                  <View style={styles.buttonContent}>
-                    <Coins size={16} color="#000000" />
-                    <Text style={styles.buttonText}>Claim Rewards</Text>
-                  </View>
-                </Button>
-              ) : (
-                <Button 
-                  onPress={onStartMining}
-                  disabled={miningStatus === 'mining'}
-                  gradient={['#8B5CF6', '#3B82F6']}
-                  style={styles.actionButton}
-                >
-                  <View style={styles.buttonContent}>
-                    <Pickaxe size={16} color="#FFFFFF" />
-                    <Text style={[styles.buttonText, styles.buttonTextWhite]}>Start Mining</Text>
-                  </View>
-                </Button>
-              )}
+              <Button 
+                onPress={onStartMining}
+                gradient={['#8B5CF6', '#3B82F6']}
+                style={styles.actionButton}
+              >
+                <View style={styles.buttonContent}>
+                  <Pickaxe size={16} color="#FFFFFF" />
+                  <Text style={[styles.buttonText, styles.buttonTextWhite]}>Start Mining</Text>
+                </View>
+              </Button>
             </CardContent>
           </Card>
 
@@ -154,12 +156,35 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingTop: 32,
+    paddingTop: 16,
     gap: 24,
+  },
+  headerContainer: {
+    gap: 16,
   },
   header: {
     alignItems: 'center',
     gap: 12,
+  },
+  logoutButton: {
+    alignSelf: 'flex-end',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  logoutGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+    borderRadius: 12,
+  },
+  logoutText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#EF4444',
   },
   iconGradient: {
     padding: 12,

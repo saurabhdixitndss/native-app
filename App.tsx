@@ -1,191 +1,280 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar } from 'react-native';
+import { StatusBar, Alert } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SplashScreen } from './src/components/SplashScreen';
 import { SignupScreen } from './src/components/SignupScreen';
 import { HomeScreen } from './src/components/HomeScreen';
 import { SelectDurationPopup } from './src/components/SelectDurationPopup';
 import { MiningScreen } from './src/components/MiningScreen';
 import { ClaimPopup } from './src/components/ClaimPopup';
+import { authAPI, miningAPI, configAPI, User, MiningSession, Config } from './src/services/api';
 
-export interface UserData {
-  walletAddress: string;
-  balance: number;
-}
-
-export interface MiningSession {
-  duration: number;
-  multiplier: number;
-  startTime: number;
-  endTime: number;
-  baseRate: number;
-  status: 'idle' | 'mining' | 'completed';
-  minedTokens: number;
-}
+type AppScreen = 'splash' | 'signup' | 'home' | 'mining';
 
 function App() {
-  const [user, setUser] = useState<UserData | null>(null);
+  const [currentScreen, setCurrentScreen] = useState<AppScreen>('splash');
+  const [user, setUser] = useState<User | null>(null);
   const [miningSession, setMiningSession] = useState<MiningSession | null>(null);
+  const [config, setConfig] = useState<Config | null>(null);
   const [showDurationPopup, setShowDurationPopup] = useState(false);
   const [showClaimPopup, setShowClaimPopup] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadData();
+    loadConfig();
   }, []);
 
-  const loadData = async () => {
+  const loadConfig = async () => {
     try {
-      const savedUser = await AsyncStorage.getItem('cryptoMinerUser');
-      const savedSession = await AsyncStorage.getItem('cryptoMinerSession');
+      const configData = await configAPI.getConfig();
+      setConfig(configData);
+    } catch (error) {
+      console.error('Error loading config:', error);
+    }
+  };
+
+  const handleSplashFinish = async () => {
+    try {
+      const savedWallet = await AsyncStorage.getItem('walletAddress');
       
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
-      }
-      
-      if (savedSession) {
-        const session = JSON.parse(savedSession);
-        const now = Date.now();
-        
-        if (session.status === 'mining') {
-          if (now >= session.endTime) {
-            session.status = 'completed';
-            session.minedTokens = (session.duration * session.baseRate * session.multiplier);
-          }
-          setMiningSession(session);
-        } else if (session.status === 'completed') {
-          setMiningSession(session);
-          setShowClaimPopup(true);
-        }
+      if (savedWallet) {
+        await loadUserData(savedWallet);
+      } else {
+        setCurrentScreen('signup');
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error loading saved data:', error);
+      setCurrentScreen('signup');
     }
   };
 
-  useEffect(() => {
-    if (user) {
-      AsyncStorage.setItem('cryptoMinerUser', JSON.stringify(user));
-    }
-  }, [user]);
+  const loadUserData = async (walletAddress: string) => {
+    try {
+      setLoading(true);
+      
+      const [balanceData, sessionData] = await Promise.all([
+        authAPI.getBalance(walletAddress),
+        miningAPI.getActiveSession(walletAddress),
+      ]);
 
-  useEffect(() => {
-    if (miningSession) {
-      AsyncStorage.setItem('cryptoMinerSession', JSON.stringify(miningSession));
-    } else {
-      AsyncStorage.removeItem('cryptoMinerSession');
-    }
-  }, [miningSession]);
-
-  const handleSignup = (walletAddress: string) => {
-    console.log('Signup called with wallet:', walletAddress);
-    const newUser: UserData = {
-      walletAddress,
-      balance: 0,
-    };
-    console.log('Setting user:', newUser);
-    setUser(newUser);
-  };
-
-  const handleStartMining = (durationHours: number, multiplier: number) => {
-    console.log('Starting mining:', { durationHours, multiplier });
-    const durationSeconds = durationHours * 3600;
-    const now = Date.now();
-    
-    const newSession: MiningSession = {
-      duration: durationSeconds,
-      multiplier,
-      startTime: now,
-      endTime: now + (durationSeconds * 1000),
-      baseRate: 0.01,
-      status: 'mining',
-      minedTokens: 0,
-    };
-    
-    console.log('New mining session created:', newSession);
-    setMiningSession(newSession);
-    setShowDurationPopup(false);
-  };
-
-  const handleCancelMining = () => {
-    setMiningSession(null);
-  };
-
-  const handleMiningComplete = (minedTokens: number) => {
-    if (miningSession) {
-      setMiningSession({
-        ...miningSession,
-        status: 'completed',
-        minedTokens,
+      setUser({
+        walletAddress: balanceData.walletAddress,
+        totalTokens: balanceData.totalTokens,
       });
-      setShowClaimPopup(true);
+
+      if (sessionData.session) {
+        setMiningSession(sessionData.session);
+        setCurrentScreen('mining');
+      } else {
+        setCurrentScreen('home');
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+      setCurrentScreen('home');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleClaimReward = () => {
-    if (user && miningSession) {
+  const handleSignup = async (walletAddress: string) => {
+    try {
+      setLoading(true);
+      
+      const response = await authAPI.signup(walletAddress);
+      
+      await AsyncStorage.setItem('walletAddress', walletAddress);
+      
+      setUser({
+        walletAddress: response.user.walletAddress,
+        totalTokens: response.user.totalTokens,
+      });
+
+      const sessionData = await miningAPI.getActiveSession(walletAddress);
+      
+      if (sessionData.session) {
+        setMiningSession(sessionData.session);
+        setCurrentScreen('mining');
+      } else {
+        setCurrentScreen('home');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      Alert.alert('Error', 'Failed to signup. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStartMining = async (durationHours: number, multiplier: number) => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      
+      const response = await miningAPI.startMining(
+        user.walletAddress,
+        durationHours,
+        multiplier
+      );
+
+      setMiningSession(response.session);
+      setShowDurationPopup(false);
+      setCurrentScreen('mining');
+    } catch (error: any) {
+      console.error('Start mining error:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to start mining');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMiningComplete = () => {
+    setShowClaimPopup(true);
+  };
+
+  const handleClaimReward = async () => {
+    if (!miningSession || !user) return;
+
+    try {
+      setLoading(true);
+      
+      const response = await miningAPI.claimReward(miningSession._id);
+
       setUser({
         ...user,
-        balance: user.balance + miningSession.minedTokens,
+        totalTokens: response.newBalance,
       });
+
       setMiningSession(null);
       setShowClaimPopup(false);
-      setTimeout(() => setShowDurationPopup(true), 300);
+      setCurrentScreen('home');
+
+      setTimeout(() => {
+        setShowDurationPopup(true);
+      }, 500);
+    } catch (error: any) {
+      console.error('Claim error:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to claim reward');
+    } finally {
+      setLoading(false);
     }
   };
 
-  console.log('App render - user:', user, 'miningSession:', miningSession);
+  const handleCancelMining = async () => {
+    if (!miningSession) return;
 
-  if (!user) {
-    console.log('Rendering SignupScreen');
+    Alert.alert(
+      'Cancel Mining',
+      'Are you sure you want to cancel? You will lose all progress.',
+      [
+        { text: 'No', style: 'cancel' },
+        {
+          text: 'Yes',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await miningAPI.cancelMining(miningSession._id);
+              setMiningSession(null);
+              setCurrentScreen('home');
+            } catch (error) {
+              console.error('Cancel error:', error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleUpgradeMultiplier = async (newMultiplier: number) => {
+    if (!miningSession) return;
+
+    try {
+      setLoading(true);
+      
+      const response = await miningAPI.upgradeMultiplier(
+        miningSession._id,
+        newMultiplier
+      );
+
+      setMiningSession(response.session);
+      Alert.alert('Success', `Multiplier upgraded to ${newMultiplier}×!`);
+    } catch (error: any) {
+      console.error('Upgrade error:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to upgrade multiplier');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (currentScreen === 'splash') {
     return (
       <SafeAreaProvider>
         <StatusBar barStyle="light-content" />
-        <SignupScreen onSignup={handleSignup} />
+        <SplashScreen onFinish={handleSplashFinish} />
       </SafeAreaProvider>
     );
   }
 
-  if (miningSession?.status === 'mining') {
-    console.log('Rendering MiningScreen with session:', miningSession);
+  if (currentScreen === 'signup') {
+    return (
+      <SafeAreaProvider>
+        <StatusBar barStyle="light-content" />
+        <SignupScreen onSignup={handleSignup} loading={loading} />
+      </SafeAreaProvider>
+    );
+  }
+
+  if (currentScreen === 'mining' && miningSession) {
     return (
       <SafeAreaProvider>
         <StatusBar barStyle="light-content" />
         <MiningScreen
           session={miningSession}
+          config={config}
           onComplete={handleMiningComplete}
           onCancel={handleCancelMining}
+          onUpgradeMultiplier={handleUpgradeMultiplier}
         />
+        {showClaimPopup && (
+          <ClaimPopup
+            minedTokens={miningSession.totalEarned}
+            onClaim={handleClaimReward}
+            loading={loading}
+          />
+        )}
       </SafeAreaProvider>
     );
   }
 
-  console.log('Rendering HomeScreen');
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('walletAddress');
+      setUser(null);
+      setMiningSession(null);
+      setCurrentScreen('signup');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="light-content" />
       <HomeScreen
         user={user}
-        miningStatus={miningSession?.status || 'idle'}
-        onStartMining={() => {
-          console.log('Start Mining button clicked');
-          setShowDurationPopup(true);
-        }}
-        onClaimRewards={() => setShowClaimPopup(true)}
-        hasRewardsToClaim={miningSession?.status === 'completed'}
+        onStartMining={() => setShowDurationPopup(true)}
+        onRefresh={() => user && loadUserData(user.walletAddress)}
+        onLogout={handleLogout}
       />
       
-      {showDurationPopup && (
+      {showDurationPopup && config && (
         <SelectDurationPopup
           visible={showDurationPopup}
+          config={config}
           onClose={() => setShowDurationPopup(false)}
           onStartMining={handleStartMining}
-        />
-      )}
-      
-      {showClaimPopup && miningSession?.status === 'completed' && (
-        <ClaimPopup
-          minedTokens={miningSession.minedTokens}
-          onClaim={handleClaimReward}
+          loading={loading}
         />
       )}
     </SafeAreaProvider>

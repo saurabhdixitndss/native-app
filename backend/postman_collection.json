@@ -1,0 +1,239 @@
+{
+  "info": {
+    "name": "Crypto Miner API",
+    "description": "API collection for Crypto Miner App",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "walletAddress",
+      "value": "test_wallet_123"
+    },
+    {
+      "key": "sessionId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"walletAddress\": \"{{walletAddress}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signup"]
+            }
+          }
+        },
+        {
+          "name": "Get Balance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/balance/{{walletAddress}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "balance", "{{walletAddress}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mining",
+      "item": [
+        {
+          "name": "Start Mining",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"walletAddress\": \"{{walletAddress}}\",\n  \"selectedHour\": 1,\n  \"multiplier\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mining/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["mining", "start"]
+            }
+          }
+        },
+        {
+          "name": "Get Active Session",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mining/active/{{walletAddress}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["mining", "active", "{{walletAddress}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Mining Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mining/status/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["mining", "status", "{{sessionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Progress",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentMiningPoints\": 36.0,\n  \"totalEarned\": 36.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mining/progress/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["mining", "progress", "{{sessionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Upgrade Multiplier",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newMultiplier\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mining/upgrade/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["mining", "upgrade", "{{sessionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Claim Reward",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mining/claim/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["mining", "claim", "{{sessionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Mining",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mining/cancel/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["mining", "cancel", "{{sessionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Mining History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mining/history/{{walletAddress}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["mining", "history", "{{walletAddress}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Config",
+      "item": [
+        {
+          "name": "Get Config",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/config",
+              "host": ["{{baseUrl}}"],
+              "path": ["config"]
+            }
+          }
+        },
+        {
+          "name": "Update Config",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"durations\": [\n    { \"h\": 1, \"label\": \"1 Hour\", \"seconds\": 3600 },\n    { \"h\": 2, \"label\": \"2 Hours\", \"seconds\": 7200 }\n  ],\n  \"multiplierOptions\": [\n    { \"value\": 1, \"label\": \"1×\", \"requiresAd\": false },\n    { \"value\": 2, \"label\": \"2×\", \"requiresAd\": true }\n  ],\n  \"baseRate\": 0.01\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/config",
+              "host": ["{{baseUrl}}"],
+              "path": ["config"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      }
+    }
+  ]
+}

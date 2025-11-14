@@ -9,9 +9,10 @@ import { Wallet, Pickaxe } from './rn/Icons';
 
 interface SignupScreenProps {
   onSignup: (walletAddress: string) => void;
+  loading?: boolean;
 }
 
-export function SignupScreen({ onSignup }: SignupScreenProps) {
+export function SignupScreen({ onSignup, loading = false }: SignupScreenProps) {
   const [walletAddress, setWalletAddress] = useState('');
   const [error, setError] = useState('');
 
@@ -21,7 +22,7 @@ export function SignupScreen({ onSignup }: SignupScreenProps) {
       return;
     }
     
-    if (walletAddress.length < 10) {
+    if (walletAddress.length < 3) {
       setError('Please enter a valid wallet address');
       return;
     }
@@ -79,8 +80,9 @@ export function SignupScreen({ onSignup }: SignupScreenProps) {
                     onPress={handleSubmit}
                     gradient={['#FBBF24', '#F97316']}
                     style={styles.button}
+                    disabled={loading}
                   >
-                    Start Mining
+                    {loading ? 'Connecting...' : 'Start Mining'}
                   </Button>
                 </View>
               </CardContent>

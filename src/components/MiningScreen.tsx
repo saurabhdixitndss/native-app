@@ -1,63 +1,130 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from './rn/Button';
 import { Card, CardContent, CardHeader, CardTitle } from './rn/Card';
 import { Progress } from './rn/Progress';
-import { Pickaxe, Coins, Clock, X, Zap } from './rn/Icons';
-import type { MiningSession } from '../../App';
+import { Pickaxe, Coins, Clock, X, Zap, ArrowLeft } from './rn/Icons';
+import { miningAPI, MiningSession, Config } from '../services/api';
 
 interface MiningScreenProps {
   session: MiningSession;
-  onComplete: (minedTokens: number) => void;
+  config: Config | null;
+  onComplete: () => void;
   onCancel: () => void;
+  onUpgradeMultiplier: (newMultiplier: number) => void;
 }
 
-export function MiningScreen({ session, onComplete, onCancel }: MiningScreenProps) {
-  const [currentTime, setCurrentTime] = useState(Date.now());
-  const [minedTokens, setMinedTokens] = useState(0);
+export function MiningScreen({ session, config, onComplete, onCancel, onUpgradeMultiplier }: MiningScreenProps) {
+  const [currentReward, setCurrentReward] = useState(0);
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
+    updateMiningStatus();
+    
     const interval = setInterval(() => {
-      const now = Date.now();
-      setCurrentTime(now);
-
-      // Calculate mined tokens based on elapsed time
-      const elapsedMs = now - session.startTime;
-      const elapsedSeconds = elapsedMs / 1000;
-      const tokensPerSecond = session.baseRate * session.multiplier;
-      const tokens = Math.min(
-        elapsedSeconds * tokensPerSecond,
-        session.duration * tokensPerSecond
-      );
-      setMinedTokens(tokens);
-
-      // Check if mining is complete
-      if (now >= session.endTime) {
-        clearInterval(interval);
-        onComplete(session.duration * tokensPerSecond);
-      }
-    }, 100);
+      updateMiningStatus();
+    }, 1000);
 
     return () => clearInterval(interval);
-  }, [session, onComplete]);
+  }, [session]);
 
-  const getRemainingTime = () => {
-    const remaining = Math.max(0, session.endTime - currentTime);
-    const hours = Math.floor(remaining / (1000 * 60 * 60));
-    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-    return { hours, minutes, seconds };
+  const updateMiningStatus = async () => {
+    try {
+      const response = await miningAPI.getMiningStatus(session._id);
+      const { status } = response;
+
+      setCurrentReward(status.currentReward);
+      setRemainingSeconds(status.remainingSeconds);
+      setIsComplete(status.isComplete);
+
+      if (status.isComplete && !isComplete) {
+        onComplete();
+      }
+    } catch (error) {
+      console.error('Error updating mining status:', error);
+      calculateLocalStatus();
+    }
+  };
+
+  const calculateLocalStatus = () => {
+    if (!config) return;
+
+    const startTime = parseDate(session.miningStartTime);
+    const now = new Date();
+    const elapsedSeconds = Math.floor((now.getTime() - startTime.getTime()) / 1000);
+    const totalSeconds = session.selectedHour * 3600;
+    
+    const reward = Math.min(
+      config.baseRate * session.multiplier * elapsedSeconds,
+      config.baseRate * session.multiplier * totalSeconds
+    );
+    
+    setCurrentReward(reward);
+    setRemainingSeconds(Math.max(0, totalSeconds - elapsedSeconds));
+    setIsComplete(elapsedSeconds >= totalSeconds);
+  };
+
+  const parseDate = (dateStr: string): Date => {
+    const [datePart, timePart] = dateStr.split(' ');
+    const [day, month, year] = datePart.split('/');
+    const [hours, minutes, seconds] = timePart.split(':');
+    
+    return new Date(
+      parseInt(year),
+      parseInt(month) - 1,
+      parseInt(day),
+      parseInt(hours),
+      parseInt(minutes),
+      parseInt(seconds)
+    );
+  };
+
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return {
+      hours: h,
+      minutes: m,
+      seconds: s,
+    };
   };
 
   const getProgress = () => {
-    const elapsed = currentTime - session.startTime;
-    const total = session.endTime - session.startTime;
-    return Math.min(100, (elapsed / total) * 100);
+    const totalSeconds = session.selectedHour * 3600;
+    const elapsed = totalSeconds - remainingSeconds;
+    return Math.min(100, (elapsed / totalSeconds) * 100);
   };
 
-  const { hours, minutes, seconds } = getRemainingTime();
+  const handleUpgrade = () => {
+    if (!config) return;
+
+    const availableMultipliers = config.multiplierOptions
+      .filter(opt => opt.value > session.multiplier)
+      .map(opt => ({
+        text: `${opt.value}× ${opt.requiresAd ? '(Watch Ad)' : ''}`,
+        onPress: () => onUpgradeMultiplier(opt.value),
+      }));
+
+    if (availableMultipliers.length === 0) {
+      Alert.alert('Max Multiplier', 'You are already at the maximum multiplier!');
+      return;
+    }
+
+    Alert.alert(
+      'Upgrade Multiplier',
+      'Choose a new multiplier to boost your mining speed:',
+      [
+        ...availableMultipliers,
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+
+  const { hours, minutes, seconds: secs } = formatTime(remainingSeconds);
   const progress = getProgress();
 
   return (
@@ -67,7 +134,17 @@ export function MiningScreen({ session, onComplete, onCancel }: MiningScreenProp
     >
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Header */}
+          {/* Back Button */}
+          <TouchableOpacity onPress={onCancel} style={styles.backButton}>
+            <LinearGradient
+              colors={['rgba(139, 92, 246, 0.2)', 'rgba(59, 130, 246, 0.2)']}
+              style={styles.backGradient}
+            >
+              <ArrowLeft size={20} color="#8B5CF6" />
+              <Text style={styles.backText}>Back</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
           <View style={styles.header}>
             <LinearGradient
               colors={['#FBBF24', '#F97316', '#EF4444']}
@@ -79,7 +156,6 @@ export function MiningScreen({ session, onComplete, onCancel }: MiningScreenProp
             <Text style={styles.headerSubtitle}>💎 Your tokens are being generated... 💎</Text>
           </View>
 
-          {/* Timer Card */}
           <Card style={styles.card}>
             <CardHeader>
               <View style={styles.cardTitleCenter}>
@@ -100,77 +176,76 @@ export function MiningScreen({ session, onComplete, onCancel }: MiningScreenProp
                 </View>
                 <Text style={styles.timerSeparator}>:</Text>
                 <View style={styles.timerUnit}>
-                  <Text style={styles.timerValue}>{String(seconds).padStart(2, '0')}</Text>
+                  <Text style={styles.timerValue}>{String(secs).padStart(2, '0')}</Text>
                   <Text style={styles.timerLabel}>Seconds</Text>
                 </View>
               </View>
             </CardContent>
           </Card>
 
-          {/* Progress Card */}
-          <Card style={styles.card}>
-            <CardContent style={styles.progressContent}>
-              <View style={styles.progressHeader}>
-                <Text style={styles.progressLabel}>Mining Progress</Text>
-                <Text style={styles.progressValue}>{progress.toFixed(1)}%</Text>
-              </View>
-              <Progress value={progress} style={styles.progressBar} />
-            </CardContent>
-          </Card>
-
-          {/* Mined Tokens Card */}
-          <Card style={StyleSheet.flatten([styles.card, styles.tokensCard])} glow>
+          <Card style={StyleSheet.flatten([styles.card, styles.rewardCard])} glow>
             <CardHeader>
               <View style={styles.cardTitleCenter}>
                 <Coins size={20} color="#FBBF24" />
-                <CardTitle>🪙 Tokens Mined</CardTitle>
+                <CardTitle>💰 Tokens Mined</CardTitle>
               </View>
             </CardHeader>
-            <CardContent style={styles.tokensContent}>
-              <View style={styles.tokensRow}>
-                <Text style={styles.tokensAmount}>{minedTokens.toFixed(2)}</Text>
-                <Text style={styles.tokensLabel}>TOKENS</Text>
+            <CardContent>
+              <View style={styles.rewardContainer}>
+                <Text style={styles.rewardAmount}>🪙 {currentReward.toFixed(4)}</Text>
+                <Text style={styles.rewardLabel}>TOKENS</Text>
               </View>
-              <Text style={styles.rateText}>
-                Rate: {(session.baseRate * session.multiplier).toFixed(4)} tokens/sec
-              </Text>
+              <Progress value={progress} style={styles.progress} />
+              <Text style={styles.progressText}>{progress.toFixed(1)}% Complete</Text>
             </CardContent>
           </Card>
 
-          {/* Mining Stats */}
-          <View style={styles.statsGrid}>
-            <Card style={styles.statCard}>
-              <CardContent style={styles.statContent}>
-                <Text style={styles.statLabel}>Duration</Text>
-                <Text style={styles.statValue}>
-                  {session.duration / 3600} <Text style={styles.statUnit}>hours</Text>
-                </Text>
-              </CardContent>
-            </Card>
-            
-            <Card style={styles.statCard}>
-              <CardContent style={styles.statContent}>
-                <View style={styles.statLabelRow}>
-                  <Zap size={16} color="#FBBF24" />
-                  <Text style={styles.statLabel}>Multiplier</Text>
+          <Card style={styles.card}>
+            <CardHeader>
+              <View style={styles.cardTitleCenter}>
+                <Zap size={20} color="#FBBF24" />
+                <CardTitle>Mining Details</CardTitle>
+              </View>
+            </CardHeader>
+            <CardContent>
+              <View style={styles.detailsGrid}>
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>Duration</Text>
+                  <Text style={styles.detailValue}>{session.selectedHour}h</Text>
                 </View>
-                <Text style={styles.statValue}>
-                  {session.multiplier}<Text style={styles.statUnit}>x</Text>
-                </Text>
-              </CardContent>
-            </Card>
-          </View>
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>Multiplier</Text>
+                  <Text style={styles.detailValue}>{session.multiplier}×</Text>
+                </View>
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>Rate</Text>
+                  <Text style={styles.detailValue}>
+                    {config ? (config.baseRate * session.multiplier).toFixed(4) : '0.00'}/s
+                  </Text>
+                </View>
+              </View>
 
-          {/* Cancel Button */}
+              <Button
+                onPress={handleUpgrade}
+                gradient={['#8B5CF6', '#3B82F6']}
+                style={styles.upgradeButton}
+              >
+                <View style={styles.buttonContent}>
+                  <Zap size={16} color="#FFFFFF" />
+                  <Text style={styles.buttonText}>Upgrade Multiplier</Text>
+                </View>
+              </Button>
+            </CardContent>
+          </Card>
+
           <Button
             onPress={onCancel}
-            variant="outline"
+            gradient={['#EF4444', '#DC2626']}
             style={styles.cancelButton}
-            textStyle={styles.cancelButtonText}
           >
             <View style={styles.buttonContent}>
-              <X size={16} color="#FCA5A5" />
-              <Text style={styles.cancelButtonText}>Cancel Mining</Text>
+              <X size={16} color="#FFFFFF" />
+              <Text style={styles.buttonText}>Cancel Mining</Text>
             </View>
           </Button>
         </ScrollView>
@@ -188,39 +263,63 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingTop: 32,
+    paddingTop: 16,
     gap: 24,
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  backGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+    borderRadius: 12,
+  },
+  backText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#8B5CF6',
   },
   header: {
     alignItems: 'center',
     gap: 12,
+    marginBottom: 8,
   },
   iconGradient: {
     padding: 16,
-    borderRadius: 20,
+    borderRadius: 24,
     shadowColor: '#FBBF24',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 25,
-    elevation: 15,
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
+    elevation: 10,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#8B5CF6',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 15,
     letterSpacing: 1,
+    textAlign: 'center',
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#D1D5DB',
+    textAlign: 'center',
   },
   card: {
     marginBottom: 0,
   },
-  tokensCard: {
+  rewardCard: {
     borderColor: 'rgba(251, 191, 36, 0.3)',
     backgroundColor: 'rgba(120, 53, 15, 0.2)',
   },
@@ -234,14 +333,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 16,
+    gap: 8,
   },
   timerUnit: {
     alignItems: 'center',
-    gap: 4,
+    minWidth: 70,
   },
   timerValue: {
-    fontSize: 40,
+    fontSize: 36,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#8B5CF6',
@@ -251,97 +350,73 @@ const styles = StyleSheet.create({
   timerLabel: {
     fontSize: 12,
     color: '#9CA3AF',
+    marginTop: 4,
   },
   timerSeparator: {
     fontSize: 36,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: '900',
+    color: '#8B5CF6',
+    marginBottom: 20,
   },
-  progressContent: {
-    paddingTop: 24,
-    gap: 8,
-  },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  rewardContainer: {
     alignItems: 'center',
+    marginBottom: 16,
   },
-  progressLabel: {
-    fontSize: 14,
-    color: '#9CA3AF',
-  },
-  progressValue: {
-    fontSize: 14,
-    color: '#FFFFFF',
-  },
-  progressBar: {
-    height: 12,
-  },
-  tokensContent: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  tokensRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 8,
-  },
-  tokensAmount: {
-    fontSize: 52,
+  rewardAmount: {
+    fontSize: 40,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#FBBF24',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
+    textShadowRadius: 15,
   },
-  tokensLabel: {
-    fontSize: 18,
+  rewardLabel: {
+    fontSize: 16,
+    fontWeight: '700',
     color: '#FBBF24',
+    marginTop: 4,
   },
-  rateText: {
+  progress: {
+    marginTop: 8,
+  },
+  progressText: {
     fontSize: 14,
     color: '#9CA3AF',
+    textAlign: 'center',
+    marginTop: 8,
   },
-  statsGrid: {
+  detailsGrid: {
     flexDirection: 'row',
-    gap: 16,
+    justifyContent: 'space-around',
+    marginBottom: 16,
   },
-  statCard: {
-    flex: 1,
-  },
-  statContent: {
-    paddingTop: 24,
+  detailItem: {
     alignItems: 'center',
     gap: 4,
   },
-  statLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  statLabel: {
-    fontSize: 14,
+  detailLabel: {
+    fontSize: 12,
     color: '#9CA3AF',
   },
-  statValue: {
+  detailValue: {
     fontSize: 18,
     fontWeight: '600',
     color: '#FFFFFF',
   },
-  statUnit: {
-    fontSize: 14,
-    color: '#9CA3AF',
+  upgradeButton: {
+    marginTop: 8,
   },
   cancelButton: {
-    backgroundColor: 'rgba(127, 29, 29, 0.2)',
-    borderColor: 'rgba(239, 68, 68, 0.3)',
-  },
-  cancelButtonText: {
-    color: '#FCA5A5',
+    marginBottom: 0,
   },
   buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#FFFFFF',
   },
 });

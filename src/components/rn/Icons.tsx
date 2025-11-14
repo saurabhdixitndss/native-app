@@ -80,3 +80,18 @@ export const PartyPopper = ({ size = 24, color = '#FFFFFF' }: IconProps) => (
     <Path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z" />
   </Svg>
 );
+
+export const LogOut = ({ size = 24, color = '#FFFFFF' }: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <Polyline points="16 17 21 12 16 7" />
+    <Line x1="21" y1="12" x2="9" y2="12" />
+  </Svg>
+);
+
+export const ArrowLeft = ({ size = 24, color = '#FFFFFF' }: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <Line x1="19" y1="12" x2="5" y2="12" />
+    <Polyline points="12 19 5 12 12 5" />
+  </Svg>
+);

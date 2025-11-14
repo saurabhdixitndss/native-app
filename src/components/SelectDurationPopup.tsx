@@ -5,31 +5,18 @@ import { Button } from './rn/Button';
 import { Card, CardContent } from './rn/Card';
 import { Clock, Zap, PlayCircle, X } from './rn/Icons';
 
+import type { Config } from '../services/api';
+
 interface SelectDurationPopupProps {
   visible: boolean;
+  config: Config;
   onClose: () => void;
   onStartMining: (durationHours: number, multiplier: number) => void;
+  loading?: boolean;
 }
 
-const DURATION_OPTIONS = [
-  { hours: 1, label: '1 Hour' },
-  { hours: 2, label: '2 Hours' },
-  { hours: 4, label: '4 Hours' },
-  { hours: 12, label: '12 Hours' },
-  { hours: 24, label: '24 Hours' },
-];
-
-const MULTIPLIER_OPTIONS = [
-  { value: 1, cost: 0, label: 'Free' },
-  { value: 2, cost: 100, label: '100 tokens' },
-  { value: 3, cost: 250, label: '250 tokens' },
-  { value: 4, cost: 500, label: '500 tokens' },
-  { value: 5, cost: 1000, label: '1000 tokens' },
-  { value: 6, cost: 2000, label: '2000 tokens' },
-];
-
-export function SelectDurationPopup({ visible, onClose, onStartMining }: SelectDurationPopupProps) {
-  const [selectedDuration, setSelectedDuration] = useState(4);
+export function SelectDurationPopup({ visible, config, onClose, onStartMining, loading = false }: SelectDurationPopupProps) {
+  const [selectedDuration, setSelectedDuration] = useState(config.durations[2]?.h || 4);
   const [selectedMultiplier, setSelectedMultiplier] = useState(1);
 
   const handleStart = () => {
@@ -38,8 +25,7 @@ export function SelectDurationPopup({ visible, onClose, onStartMining }: SelectD
 
   const calculateReward = () => {
     const durationSeconds = selectedDuration * 3600;
-    const baseRate = 0.01;
-    return (durationSeconds * baseRate * selectedMultiplier).toFixed(2);
+    return (durationSeconds * config.baseRate * selectedMultiplier).toFixed(2);
   };
 
   return (
@@ -74,13 +60,13 @@ export function SelectDurationPopup({ visible, onClose, onStartMining }: SelectD
               <View style={styles.section}>
                 <Text style={styles.sectionLabel}>Duration</Text>
                 <View style={styles.optionsGrid}>
-                  {DURATION_OPTIONS.map((option) => (
+                  {config.durations.map((option) => (
                     <TouchableOpacity
-                      key={option.hours}
-                      onPress={() => setSelectedDuration(option.hours)}
+                      key={option.h}
+                      onPress={() => setSelectedDuration(option.h)}
                       style={styles.optionButton}
                     >
-                      {selectedDuration === option.hours ? (
+                      {selectedDuration === option.h ? (
                         <LinearGradient
                           colors={['#8B5CF6', '#3B82F6']}
                           style={styles.optionGradient}
@@ -104,25 +90,29 @@ export function SelectDurationPopup({ visible, onClose, onStartMining }: SelectD
                   <Text style={styles.sectionLabel}>Multiplier (Boost Mining Speed)</Text>
                 </View>
                 <View style={styles.optionsGrid}>
-                  {MULTIPLIER_OPTIONS.map((option) => (
+                  {config.multiplierOptions.map((option) => (
                     <TouchableOpacity
                       key={option.value}
                       onPress={() => setSelectedMultiplier(option.value)}
+                      disabled={option.value > 1 && option.requiresAd}
                     >
                       <Card style={StyleSheet.flatten([
                         styles.multiplierCard,
-                        selectedMultiplier === option.value && styles.multiplierCardSelected
+                        selectedMultiplier === option.value && styles.multiplierCardSelected,
+                        option.value > 1 && option.requiresAd && styles.multiplierCardDisabled
                       ])}>
                         <CardContent style={styles.multiplierContent}>
                           <Text style={styles.multiplierValue}>{option.value}x</Text>
-                          <Text style={styles.multiplierLabel}>{option.label}</Text>
+                          <Text style={styles.multiplierLabel}>
+                            {option.requiresAd && option.value > 1 ? 'Watch Ad' : option.label}
+                          </Text>
                         </CardContent>
                       </Card>
                     </TouchableOpacity>
                   ))}
                 </View>
                 <Text style={styles.hint}>
-                  Higher multipliers increase token generation rate
+                  {selectedMultiplier === 1 ? 'Free mining at 1× speed' : 'Higher multipliers require watching ads'}
                 </Text>
               </View>
 
@@ -137,7 +127,7 @@ export function SelectDurationPopup({ visible, onClose, onStartMining }: SelectD
                   <View style={styles.rewardDetails}>
                     <Text style={styles.rewardDetail}>Duration: {selectedDuration} hours</Text>
                     <Text style={styles.rewardDetail}>Multiplier: {selectedMultiplier}x</Text>
-                    <Text style={styles.rewardDetail}>Rate: {(0.01 * selectedMultiplier).toFixed(4)} tokens/sec</Text>
+                    <Text style={styles.rewardDetail}>Rate: {(config.baseRate * selectedMultiplier).toFixed(4)} tokens/sec</Text>
                   </View>
                 </CardContent>
               </Card>
@@ -147,10 +137,11 @@ export function SelectDurationPopup({ visible, onClose, onStartMining }: SelectD
                 onPress={handleStart}
                 gradient={['#FBBF24', '#F97316']}
                 style={styles.startButton}
+                disabled={loading}
               >
                 <View style={styles.buttonContent}>
                   <PlayCircle size={16} color="#000000" />
-                  <Text style={styles.startButtonText}>Start Mining</Text>
+                  <Text style={styles.startButtonText}>{loading ? 'Starting...' : 'Start Mining'}</Text>
                 </View>
               </Button>
             </ScrollView>
@@ -272,6 +263,9 @@ const styles = StyleSheet.create({
   multiplierCardSelected: {
     borderColor: '#FBBF24',
     backgroundColor: 'rgba(251, 191, 36, 0.1)',
+  },
+  multiplierCardDisabled: {
+    opacity: 0.5,
   },
   multiplierContent: {
     padding: 12,
