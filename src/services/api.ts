@@ -118,4 +118,23 @@ export const configAPI = {
   },
 };
 
+export interface Notification {
+  sessionId: string;
+  message: string;
+  totalEarned: number;
+  completedAt: Date;
+}
+
+export const notificationAPI = {
+  getPendingNotifications: async (walletAddress: string) => {
+    const response = await api.get(`/notifications/pending/${walletAddress}`);
+    return response.data;
+  },
+
+  clearNotification: async (sessionId: string) => {
+    const response = await api.post(`/notifications/clear/${sessionId}`);
+    return response.data;
+  },
+};
+
 export default api;

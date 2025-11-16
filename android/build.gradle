@@ -19,3 +19,12 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        // Fallback for jcenter dependencies
+        maven { url 'https://jcenter.bintray.com' }
+    }
+}

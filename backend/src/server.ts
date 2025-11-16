@@ -5,7 +5,9 @@ import { connectDB } from './config/database';
 import authRoutes from './routes/authRoutes';
 import miningRoutes from './routes/miningRoutes';
 import configRoutes from './routes/configRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 import { errorHandler, notFound } from './middleware/errorHandler';
+import { initNotificationService } from './services/notificationService';
 
 // Morgan with require to avoid TypeScript issues
 const morgan = require('morgan');
@@ -29,6 +31,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/mining', miningRoutes);
 app.use('/api/config', configRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Crypto Miner API is running' });
@@ -38,6 +41,9 @@ app.use(notFound);
 app.use(errorHandler);
 
 connectDB().then(() => {
+  // Initialize notification service
+  initNotificationService();
+  
   app.listen(PORT, () => {
     console.log('═══════════════════════════════════════════════════');
     console.log('�  Crypto Miner Backend Server');
@@ -47,6 +53,7 @@ connectDB().then(() => {
     console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
     console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`📊 Logging: ${isDevelopment ? 'dev mode' : 'combined mode'}`);
+    console.log(`🔔 Notification service: Active`);
     console.log('═══════════════════════════════════════════════════');
   });
 });

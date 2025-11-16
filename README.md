@@ -1,8 +1,73 @@
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
+# Crypto Mining App
+
+A React Native application with a Node.js backend for cryptocurrency mining simulation with real-time notifications.
+
+## ✨ Features
+
+- 🔐 Wallet-based authentication
+- ⛏️ Mining sessions with customizable durations
+- 🚀 Multiplier upgrades for faster mining
+- 💰 Real-time token balance tracking
+- 🔔 **Push notifications when mining completes** (NEW!)
+- 📱 Works on iOS and Android
+- 🎨 Beautiful UI with animations
+
+## 🔔 Mining Completion Notifications
+
+This app now includes comprehensive notification functionality:
+
+- ✅ Get notified when mining completes (app open, closed, or backgrounded)
+- ✅ Works whether you're logged in or logged out
+- ✅ Automatic checks every minute (backend) and every 5 minutes (frontend)
+- ✅ Tap notification to claim rewards instantly
+- ✅ Cross-platform support (iOS & Android)
+
+**Quick Start**: See [QUICK_START_NOTIFICATIONS.md](QUICK_START_NOTIFICATIONS.md) for setup instructions.
+
+**Full Documentation**:
+- [Notification Setup Guide](NOTIFICATION_SETUP.md)
+- [Testing Guide](TESTING_NOTIFICATIONS.md)
+- [Feature Summary](NOTIFICATION_FEATURE_SUMMARY.md)
+- [Library Update Note](LIBRARY_UPDATE_NOTE.md) - Using Notifee for notifications
+
 # Getting Started
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+
+## Prerequisites
+
+1. Node.js (v20 or higher)
+2. MongoDB (running locally or remote connection)
+3. React Native development environment set up
+
+## Step 0: Start the Backend Server
+
+The app requires a backend server for mining sessions and notifications.
+
+```sh
+# Navigate to backend directory
+cd backend
+
+# Install dependencies (first time only)
+npm install
+
+# Create .env file (first time only)
+cp .env.example .env
+# Edit .env and add your MongoDB connection string
+
+# Start the backend server
+npm run dev
+```
+
+You should see:
+```
+✅ Notification service initialized - checking every minute
+🔔 Notification service: Active
+```
+
+For more details, see [backend/README.md](backend/README.md)
 
 ## Step 1: Start Metro
 

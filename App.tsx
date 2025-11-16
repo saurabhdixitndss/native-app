@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar, Alert } from 'react-native';
+import { StatusBar, Alert, AppState, AppStateStatus } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SplashScreen } from './src/components/SplashScreen';
@@ -8,7 +8,13 @@ import { HomeScreen } from './src/components/HomeScreen';
 import { SelectDurationPopup } from './src/components/SelectDurationPopup';
 import { MiningScreen } from './src/components/MiningScreen';
 import { ClaimScreen } from './src/components/ClaimScreen';
-import { authAPI, miningAPI, configAPI, User, MiningSession, Config } from './src/services/api';
+import { authAPI, miningAPI, configAPI, notificationAPI, User, MiningSession, Config } from './src/services/api';
+import { 
+  configurePushNotifications, 
+  startPeriodicCheck, 
+  stopPeriodicCheck,
+  checkForCompletedMining 
+} from './src/services/notificationService';
 
 type AppScreen = 'splash' | 'signup' | 'home' | 'mining' | 'claim';
 
@@ -21,9 +27,83 @@ function App() {
   // Removed showClaimPopup state - using screen navigation instead
   const [loading, setLoading] = useState(false);
 
+  const handleAppStateChange = React.useCallback((nextAppState: AppStateStatus) => {
+    if (nextAppState === 'active') {
+      // App came to foreground - check for completed mining
+      console.log('📱 App came to foreground - checking for completed mining...');
+      checkForCompletedMining();
+      
+      // Also check backend notifications
+      if (user) {
+        checkPendingNotifications(user.walletAddress);
+      }
+    }
+  }, [user]);
+
   useEffect(() => {
     loadConfig();
-  }, []);
+    
+    // Configure push notifications
+    configurePushNotifications().catch(error => {
+      console.error('Error configuring notifications:', error);
+    });
+    
+    // Start periodic checks for completed mining
+    startPeriodicCheck();
+    
+    // Handle app state changes (foreground/background)
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    
+    return () => {
+      subscription.remove();
+      stopPeriodicCheck();
+    };
+  }, [handleAppStateChange]);
+
+  const checkPendingNotifications = async (walletAddress: string) => {
+    try {
+      const response = await notificationAPI.getPendingNotifications(walletAddress);
+      
+      if (response.notifications && response.notifications.length > 0) {
+        const notification = response.notifications[0];
+        
+        // Show alert
+        Alert.alert(
+          '🎉 Mining Complete!',
+          notification.message,
+          [
+            {
+              text: 'Claim Now',
+              onPress: async () => {
+                // Clear notification
+                await notificationAPI.clearNotification(notification.sessionId);
+                
+                // Load session and navigate to claim screen
+                const sessionData = await miningAPI.getActiveSession(walletAddress);
+                if (sessionData.session) {
+                  const statusResponse = await miningAPI.getMiningStatus(sessionData.session._id);
+                  setMiningSession({
+                    ...sessionData.session,
+                    totalEarned: statusResponse.status.currentReward,
+                  });
+                  setCurrentScreen('claim');
+                }
+              },
+            },
+            {
+              text: 'Later',
+              style: 'cancel',
+              onPress: () => {
+                // Don't clear notification - will show again next time
+              },
+            },
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Error checking pending notifications:', error);
+    }
+  };
 
   const loadConfig = async () => {
     try {
@@ -70,6 +150,13 @@ function App() {
       if (sessionData.session) {
         setMiningSession(sessionData.session);
         console.log('📍 Active session found, stored for later');
+        
+        // Check if mining is complete
+        const statusResponse = await miningAPI.getMiningStatus(sessionData.session._id);
+        if (statusResponse.status.isComplete) {
+          // Mining complete - check for notifications
+          await checkPendingNotifications(walletAddress);
+        }
       }
 
       // Always navigate to Home Screen after login
