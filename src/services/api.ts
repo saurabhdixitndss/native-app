@@ -131,6 +131,11 @@ export const notificationAPI = {
     return response.data;
   },
 
+  getAllPendingNotifications: async () => {
+    const response = await api.get('/notifications/all');
+    return response.data;
+  },
+
   clearNotification: async (sessionId: string) => {
     const response = await api.post(`/notifications/clear/${sessionId}`);
     return response.data;

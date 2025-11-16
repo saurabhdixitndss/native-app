@@ -29,10 +29,12 @@ export const configurePushNotifications = async () => {
 };
 
 // Show local notification
-export const showMiningCompleteNotification = async (tokensEarned: number) => {
+export const showMiningCompleteNotification = async (tokensEarned: number, walletAddress?: string) => {
+  const walletInfo = walletAddress ? `\nWallet: ${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}` : '';
+  
   await notifee.displayNotification({
     title: '🎉 Mining Complete!',
-    body: `You've earned ${tokensEarned.toFixed(4)} tokens. Tap to claim your rewards!`,
+    body: `You've earned ${tokensEarned.toFixed(4)} tokens. Tap to claim your rewards!${walletInfo}`,
     android: {
       channelId: 'mining-complete',
       importance: AndroidImportance.HIGH,
@@ -54,30 +56,64 @@ export const showMiningCompleteNotification = async (tokensEarned: number) => {
   });
 };
 
-// Check for completed mining sessions
+// Track which sessions have already been notified
+const notifiedSessions = new Set<string>();
+
+// Check for completed mining sessions for ALL users
 export const checkForCompletedMining = async (): Promise<boolean> => {
   try {
-    const walletAddress = await AsyncStorage.getItem('walletAddress');
-    if (!walletAddress) return false;
-
-    // Get active session
-    const sessionData = await miningAPI.getActiveSession(walletAddress);
-    if (!sessionData.session) return false;
-
-    // Check if mining is complete
-    const statusResponse = await miningAPI.getMiningStatus(sessionData.session._id);
+    console.log('🔍 Checking for completed mining (all users)...');
     
-    if (statusResponse.status.isComplete && statusResponse.status.canClaim) {
-      // Show notification
-      showMiningCompleteNotification(statusResponse.status.currentReward);
-      return true;
+    // Import the API
+    const { notificationAPI } = require('./api');
+    
+    // Get ALL completed sessions (not just current user)
+    const response = await notificationAPI.getAllPendingNotifications();
+    
+    console.log('📡 API Response:', JSON.stringify(response, null, 2));
+    
+    if (!response.notifications || response.notifications.length === 0) {
+      console.log('ℹ️ No completed mining sessions found');
+      return false;
     }
 
-    return false;
+    console.log(`📋 Found ${response.notifications.length} completed session(s)`);
+    let hasNewNotifications = false;
+
+    // Show notification for each completed session that hasn't been notified yet
+    for (const notification of response.notifications) {
+      const sessionId = notification.sessionId;
+      
+      console.log(`🔍 Checking session ${sessionId}...`);
+      
+      // Skip if already notified
+      if (notifiedSessions.has(sessionId)) {
+        console.log(`⏭️ Session ${sessionId} already notified, skipping`);
+        continue;
+      }
+
+      console.log(`🔔 Showing notification for session ${sessionId}`);
+      
+      // Show notification
+      await showMiningCompleteNotification(notification.totalEarned, notification.walletAddress);
+      
+      // Mark as notified
+      notifiedSessions.add(sessionId);
+      hasNewNotifications = true;
+      
+      console.log(`✅ Notification shown for wallet ${notification.walletAddress}: ${notification.totalEarned.toFixed(4)} tokens`);
+    }
+
+    return hasNewNotifications;
   } catch (error) {
-    console.error('Error checking for completed mining:', error);
+    console.error('❌ Error checking for completed mining:', error);
     return false;
   }
+};
+
+// Clear notified session from tracking (when user claims)
+export const clearNotifiedSession = (sessionId: string) => {
+  notifiedSessions.delete(sessionId);
 };
 
 // Schedule periodic checks (every 5 minutes)

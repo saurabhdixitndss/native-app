@@ -32,6 +32,8 @@ const checkCompletedSessions = async () => {
   try {
     const activeSessions = await MiningSession.find({ status: 'mining' });
     
+    console.log(`🔍 Checking ${activeSessions.length} active mining session(s)...`);
+    
     const now = new Date();
     
     for (const session of activeSessions) {
@@ -39,8 +41,13 @@ const checkCompletedSessions = async () => {
       const durationMs = session.selectedHour * 60 * 60 * 1000;
       const endTime = new Date(startTime.getTime() + durationMs);
       
-      // Check if mining is complete
       const sessionId = String(session._id);
+      const timeRemaining = endTime.getTime() - now.getTime();
+      const minutesRemaining = Math.floor(timeRemaining / 60000);
+      
+      console.log(`  Session ${sessionId}: ${minutesRemaining} minutes remaining`);
+      
+      // Check if mining is complete
       if (now >= endTime && !completedSessions.has(sessionId)) {
         // Calculate final reward
         const elapsedSeconds = Math.floor((now.getTime() - startTime.getTime()) / 1000);
@@ -59,6 +66,7 @@ const checkCompletedSessions = async () => {
         });
         
         console.log(`🔔 Mining completed for wallet ${session.wallet}. Reward: ${currentReward.toFixed(4)} tokens`);
+        console.log(`📊 Total completed sessions in memory: ${completedSessions.size}`);
       }
     }
   } catch (error) {
