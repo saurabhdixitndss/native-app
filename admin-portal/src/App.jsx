@@ -10,6 +10,10 @@ import Header from './components/Header';
 function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    // Get theme from localStorage or default to 'dark'
+    return localStorage.getItem('theme') || 'dark';
+  });
 
   // Close mobile menu when page changes
   useEffect(() => {
@@ -27,6 +31,16 @@ function App() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
+  };
 
   const renderPage = () => {
     switch (currentPage) {
@@ -58,7 +72,7 @@ function App() {
 
       {/* Main Content */}
       <div className="main-content">
-        <Header currentPage={currentPage} />
+        <Header currentPage={currentPage} theme={theme} toggleTheme={toggleTheme} />
         <div className="page-content">
           {renderPage()}
         </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Header = ({ currentPage }) => {
+const Header = ({ currentPage, theme, toggleTheme }) => {
   const getPageInfo = (page) => {
     const pages = {
       dashboard: { 
@@ -65,7 +65,7 @@ const Header = ({ currentPage }) => {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '16px'
+          gap: '12px'
         }}>
           <div style={{
             padding: '10px 16px',
@@ -85,6 +85,38 @@ const Header = ({ currentPage }) => {
               {currentTime}
             </span>
           </div>
+
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: theme === 'dark' 
+                ? 'linear-gradient(135deg, #1F2937 0%, #374151 100%)'
+                : 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '20px',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              boxShadow: theme === 'dark'
+                ? '0 4px 12px rgba(31, 41, 55, 0.5)'
+                : '0 4px 12px rgba(245, 158, 11, 0.5)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.1) rotate(180deg)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+            }}
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          >
+            {theme === 'dark' ? '🌙' : '☀️'}
+          </button>
           
           <div style={{
             width: '40px',
