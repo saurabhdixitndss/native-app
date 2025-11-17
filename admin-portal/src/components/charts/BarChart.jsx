@@ -101,7 +101,6 @@ const BarChart = ({ data, title, color = '#8B5CF6', height = 300 }) => {
                     position: 'absolute',
                     bottom: '-4px',
                     left: '50%',
-                    transform: 'translateX(-50%)',
                     width: '8px',
                     height: '8px',
                     background: color,

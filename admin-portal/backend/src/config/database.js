@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 export const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/crypto-miner';
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/crypto';
     
     await mongoose.connect(mongoURI);
     
