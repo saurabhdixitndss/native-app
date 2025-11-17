@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-// User Schema (from main app)
+// User Schema (from main app) - Enhanced with payment tracking
 const userSchema = new mongoose.Schema({
   walletAddress: {
     type: String,
@@ -12,6 +12,25 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'processing', 'completed', 'failed'],
+    default: 'pending',
+  },
+  lastPaymentDate: {
+    type: Date,
+    default: null,
+  },
+  totalPaid: {
+    type: Number,
+    default: 0,
+  },
+  paymentHistory: [{
+    amount: Number,
+    status: String,
+    date: Date,
+    transactionId: String,
+  }],
 }, { timestamps: true });
 
 // Mining Session Schema (from main app)

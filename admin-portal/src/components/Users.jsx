@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import apiService from '../services/api';
+import PaymentModal from './PaymentModal';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -8,6 +9,8 @@ const Users = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -52,6 +55,56 @@ const Users = () => {
     // You could add a toast notification here
   };
 
+  const handlePayment = (user) => {
+    setSelectedUser(user);
+    setShowPaymentModal(true);
+  };
+
+  const handleConfirmPayment = async (amount) => {
+    try {
+      await apiService.processPayment(selectedUser.walletAddress, amount);
+      // Refresh users list
+      await fetchUsers();
+    } catch (err) {
+      throw new Error(err.message || 'Payment failed');
+    }
+  };
+
+  const getPaymentStatusBadge = (user) => {
+    const status = user.paymentStatus || 'pending';
+    const statusConfig = {
+      pending: { color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)', icon: '⏳', label: 'Pending' },
+      processing: { color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.15)', icon: '⚡', label: 'Processing' },
+      completed: { color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)', icon: '✓', label: 'Completed' },
+      failed: { color: '#EF4444', bg: 'rgba(239, 68, 68, 0.15)', icon: '✗', label: 'Failed' }
+    };
+
+    const config = statusConfig[status] || statusConfig.pending;
+
+    return (
+      <div style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+        padding: '6px 12px',
+        background: config.bg,
+        borderRadius: '20px',
+        border: `1px solid ${config.color}40`
+      }}>
+        <span style={{ fontSize: '14px' }}>{config.icon}</span>
+        <span style={{
+          color: config.color,
+          fontSize: '12px',
+          fontWeight: '700',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px'
+        }}>
+          {config.label}
+        </span>
+      </div>
+    );
+  };
+
   if (loading && users.length === 0) {
     return <div className="loading">Loading users...</div>;
   }
@@ -77,7 +130,11 @@ const Users = () => {
             <tr>
               <th>Wallet Address</th>
               <th>Total Tokens</th>
+              <th>Total Paid</th>
+              <th>Payment Status</th>
+              <th>Last Payment</th>
               <th>Joined Date</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -125,6 +182,30 @@ const Users = () => {
                   </div>
                 </td>
                 <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '16px' }}>💵</span>
+                    <span style={{ 
+                      color: '#10B981', 
+                      fontWeight: '700',
+                      fontSize: '14px'
+                    }}>
+                      {(user.totalPaid || 0).toFixed(4)}
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  {getPaymentStatusBadge(user)}
+                </td>
+                <td>
+                  <span style={{ 
+                    color: '#9CA3AF',
+                    fontSize: '13px',
+                    fontWeight: '500'
+                  }}>
+                    {user.lastPaymentDate ? formatDate(user.lastPaymentDate) : 'Never'}
+                  </span>
+                </td>
+                <td>
                   <span style={{ 
                     color: '#9CA3AF',
                     fontSize: '13px',
@@ -132,6 +213,39 @@ const Users = () => {
                   }}>
                     {formatDate(user.createdAt)}
                   </span>
+                </td>
+                <td>
+                  <button
+                    onClick={() => handlePayment(user)}
+                    disabled={user.totalTokens <= 0}
+                    style={{
+                      padding: '8px 16px',
+                      background: user.totalTokens > 0 
+                        ? 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)'
+                        : 'rgba(255, 255, 255, 0.1)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: '#FFFFFF',
+                      fontSize: '12px',
+                      fontWeight: '700',
+                      cursor: user.totalTokens > 0 ? 'pointer' : 'not-allowed',
+                      transition: 'all 0.3s ease',
+                      boxShadow: user.totalTokens > 0 ? '0 2px 8px rgba(139, 92, 246, 0.3)' : 'none',
+                      opacity: user.totalTokens > 0 ? 1 : 0.5
+                    }}
+                    onMouseEnter={(e) => {
+                      if (user.totalTokens > 0) {
+                        e.target.style.transform = 'translateY(-2px)';
+                        e.target.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.5)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = user.totalTokens > 0 ? '0 2px 8px rgba(139, 92, 246, 0.3)' : 'none';
+                    }}
+                  >
+                    💰 Pay Tokens
+                  </button>
                 </td>
               </tr>
             ))}
@@ -168,6 +282,18 @@ const Users = () => {
           </div>
         )}
       </div>
+
+      {/* Payment Modal */}
+      {showPaymentModal && selectedUser && (
+        <PaymentModal
+          user={selectedUser}
+          onClose={() => {
+            setShowPaymentModal(false);
+            setSelectedUser(null);
+          }}
+          onConfirm={handleConfirmPayment}
+        />
+      )}
     </div>
   );
 };

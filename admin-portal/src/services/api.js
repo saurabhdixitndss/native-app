@@ -57,6 +57,18 @@ class ApiService {
   async getConfig() {
     return this.request('/config');
   }
+
+  // Payments
+  async processPayment(walletAddress, amount) {
+    return this.request(`/users/${walletAddress}/payment`, {
+      method: 'POST',
+      body: JSON.stringify({ amount })
+    });
+  }
+
+  async getPaymentHistory(walletAddress) {
+    return this.request(`/users/${walletAddress}/payment-history`);
+  }
 }
 
 export default new ApiService();

@@ -324,3 +324,87 @@ export const getConfig = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch config' });
   }
 };
+
+// Process Payment
+export const processPayment = async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+    const { amount } = req.body;
+
+    const user = await User.findOne({ walletAddress });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if user has enough tokens
+    if (user.totalTokens < amount) {
+      return res.status(400).json({ 
+        message: 'Insufficient tokens',
+        available: user.totalTokens,
+        requested: amount
+      });
+    }
+
+    // Simulate payment processing
+    const transactionId = `TXN${Date.now()}${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+
+    // Update user payment status
+    user.paymentStatus = 'completed';
+    user.lastPaymentDate = new Date();
+    user.totalPaid = (user.totalPaid || 0) + amount;
+    
+    // Add to payment history
+    if (!user.paymentHistory) {
+      user.paymentHistory = [];
+    }
+    user.paymentHistory.push({
+      amount,
+      status: 'completed',
+      date: new Date(),
+      transactionId
+    });
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Payment processed successfully',
+      transactionId,
+      user: {
+        walletAddress: user.walletAddress,
+        totalTokens: user.totalTokens,
+        totalPaid: user.totalPaid,
+        paymentStatus: user.paymentStatus,
+        lastPaymentDate: user.lastPaymentDate
+      }
+    });
+  } catch (error) {
+    console.error('Process payment error:', error);
+    res.status(500).json({ message: 'Failed to process payment' });
+  }
+};
+
+// Get Payment History
+export const getPaymentHistory = async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+
+    const user = await User.findOne({ walletAddress }).lean();
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      walletAddress: user.walletAddress,
+      totalPaid: user.totalPaid || 0,
+      paymentStatus: user.paymentStatus || 'pending',
+      lastPaymentDate: user.lastPaymentDate,
+      paymentHistory: user.paymentHistory || []
+    });
+  } catch (error) {
+    console.error('Get payment history error:', error);
+    res.status(500).json({ message: 'Failed to fetch payment history' });
+  }
+};
