@@ -279,6 +279,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   balanceTitle: {
+    paddingTop:12,
     fontSize: 18,
     fontWeight: '900',
     color: '#FBBF24',
