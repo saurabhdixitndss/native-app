@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 50,
   },
-
+ 
   leftNav: {
     justifyContent: 'center',
     alignItems: 'center',
