@@ -36,21 +36,30 @@ const Header = ({ currentPage }) => {
   return (
     <div className="header">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
-        <div>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
-            <span style={{ fontSize: '32px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}>
+            <span style={{ 
+              fontSize: window.innerWidth < 768 ? '24px' : '32px',
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+            }}>
               {pageInfo.icon}
             </span>
-            <h1 className="header-title">{pageInfo.title}</h1>
+            <h1 className="header-title" style={{
+              fontSize: window.innerWidth < 768 ? '18px' : undefined
+            }}>
+              {pageInfo.title}
+            </h1>
           </div>
-          <p style={{
-            color: '#9CA3AF',
-            fontSize: '14px',
-            fontWeight: '500',
-            marginLeft: '44px'
-          }}>
-            {pageInfo.subtitle}
-          </p>
+          {window.innerWidth >= 768 && (
+            <p style={{
+              color: '#9CA3AF',
+              fontSize: '14px',
+              fontWeight: '500',
+              marginLeft: '44px'
+            }}>
+              {pageInfo.subtitle}
+            </p>
+          )}
         </div>
         
         <div style={{

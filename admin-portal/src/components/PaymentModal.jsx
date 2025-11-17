@@ -41,19 +41,23 @@ const PaymentModal = ({ user, onClose, onConfirm }) => {
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 1000,
-      animation: 'fadeIn 0.3s ease'
+      animation: 'fadeIn 0.3s ease',
+      padding: '20px'
     }}>
       <div style={{
         background: 'linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(15, 15, 35, 0.98) 100%)',
-        borderRadius: '24px',
-        padding: success ? '60px' : '40px',
+        borderRadius: window.innerWidth < 480 ? '16px' : '24px',
+        padding: success 
+          ? (window.innerWidth < 480 ? '40px 20px' : '60px')
+          : (window.innerWidth < 480 ? '30px 20px' : '40px'),
         maxWidth: '500px',
-        width: '90%',
+        width: '100%',
+        maxHeight: '90vh',
+        overflowY: 'auto',
         border: '1px solid rgba(139, 92, 246, 0.3)',
         boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
         animation: 'slideUp 0.3s ease',
-        position: 'relative',
-        overflow: 'hidden'
+        position: 'relative'
       }}>
         {/* Background decoration */}
         <div style={{
@@ -74,9 +78,9 @@ const PaymentModal = ({ user, onClose, onConfirm }) => {
             zIndex: 1
           }}>
             <div style={{
-              width: '160px',
-              height: '160px',
-              margin: '0 auto 32px',
+              width: window.innerWidth < 480 ? '120px' : '160px',
+              height: window.innerWidth < 480 ? '120px' : '160px',
+              margin: '0 auto 24px',
               background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
               borderRadius: '50%',
               display: 'flex',
@@ -98,8 +102,8 @@ const PaymentModal = ({ user, onClose, onConfirm }) => {
               
               {/* Checkmark SVG */}
               <svg 
-                width="90" 
-                height="90" 
+                width={window.innerWidth < 480 ? "70" : "90"}
+                height={window.innerWidth < 480 ? "70" : "90"}
                 viewBox="0 0 52 52" 
                 fill="none"
                 style={{
@@ -125,7 +129,7 @@ const PaymentModal = ({ user, onClose, onConfirm }) => {
             
             <h2 style={{
               color: '#FFFFFF',
-              fontSize: '28px',
+              fontSize: window.innerWidth < 480 ? '22px' : '28px',
               fontWeight: '800',
               marginBottom: '12px'
             }}>
@@ -134,7 +138,7 @@ const PaymentModal = ({ user, onClose, onConfirm }) => {
             
             <p style={{
               color: '#10B981',
-              fontSize: '18px',
+              fontSize: window.innerWidth < 480 ? '16px' : '18px',
               fontWeight: '600',
               marginBottom: '8px'
             }}>
@@ -143,7 +147,7 @@ const PaymentModal = ({ user, onClose, onConfirm }) => {
             
             <p style={{
               color: '#9CA3AF',
-              fontSize: '14px'
+              fontSize: window.innerWidth < 480 ? '13px' : '14px'
             }}>
               Transaction completed successfully
             </p>
@@ -352,6 +356,7 @@ const PaymentModal = ({ user, onClose, onConfirm }) => {
             {/* Action Buttons */}
             <div style={{
               display: 'flex',
+              flexDirection: window.innerWidth < 480 ? 'column' : 'row',
               gap: '12px'
             }}>
               <button

@@ -9,7 +9,7 @@ const Sidebar = ({ currentPage, onPageChange }) => {
   ];
 
   return (
-    <div className="sidebar">
+    <>
       <div className="sidebar-header">
         <h1 className="sidebar-title">
           <span style={{ 
@@ -88,7 +88,7 @@ const Sidebar = ({ currentPage, onPageChange }) => {
           v1.0.0
         </p>
       </div>
-    </div>
+    </>
   );
 };
 
