@@ -496,6 +496,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
+  
+
   appIconGlow: {
     padding: 12,
     borderRadius: 20,
