@@ -1,11 +1,10 @@
 import notifee, { AndroidImportance, AuthorizationStatus } from '@notifee/react-native';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { miningAPI } from './api';
+import { notificationAPI } from './api';
 
 // Configure push notifications
 export const configurePushNotifications = async () => {
-  // Request permissions
   const settings = await notifee.requestPermission();
   
   if (settings.authorizationStatus >= AuthorizationStatus.AUTHORIZED) {
@@ -14,12 +13,11 @@ export const configurePushNotifications = async () => {
     console.log('⚠️ Notification permissions denied');
   }
 
-  // Create notification channel for Android
   if (Platform.OS === 'android') {
     await notifee.createChannel({
       id: 'mining-complete',
       name: 'Mining Complete',
-      description: 'Notifications for completed mining sessions',
+      description: 'Notifications when mining is complete',
       importance: AndroidImportance.HIGH,
       sound: 'default',
       vibration: true,
@@ -28,13 +26,13 @@ export const configurePushNotifications = async () => {
   }
 };
 
-// Show local notification
-export const showMiningCompleteNotification = async (tokensEarned: number, walletAddress?: string) => {
-  const walletInfo = walletAddress ? `\nWallet: ${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}` : '';
+// Show "Claim Rewards" notification
+const showClaimRewardsNotification = async (walletAddress: string) => {
+  const shortWallet = `${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}`;
   
   await notifee.displayNotification({
     title: '🎉 Mining Complete!',
-    body: `You've earned ${tokensEarned.toFixed(4)} tokens. Tap to claim your rewards!${walletInfo}`,
+    body: `Claim Rewards for wallet ${shortWallet}`,
     android: {
       channelId: 'mining-complete',
       importance: AndroidImportance.HIGH,
@@ -54,69 +52,42 @@ export const showMiningCompleteNotification = async (tokensEarned: number, walle
       },
     },
   });
+  
+  console.log(`🔔 Notification shown for wallet ${shortWallet}`);
 };
 
-// Track which sessions have already been notified
-const notifiedSessions = new Set<string>();
+// Track which wallets have been notified (to avoid duplicates)
+const notifiedWallets = new Set<string>();
 
-// Check for completed mining sessions for ALL users
-export const checkForCompletedMining = async (): Promise<boolean> => {
+// Check for completed mining and show notifications
+export const checkAndNotify = async (): Promise<void> => {
   try {
-    console.log('🔍 Checking for completed mining (all users)...');
+    // Get all wallets with completed mining from backend
+    const response = await notificationAPI.getCompletedWallets();
+    const completedWallets: string[] = response.wallets || [];
     
-    // Import the API
-    const { notificationAPI } = require('./api');
-    
-    // Get ALL completed sessions (not just current user)
-    const response = await notificationAPI.getAllPendingNotifications();
-    
-    console.log('📡 API Response:', JSON.stringify(response, null, 2));
-    
-    if (!response.notifications || response.notifications.length === 0) {
-      console.log('ℹ️ No completed mining sessions found');
-      return false;
+    if (completedWallets.length === 0) {
+      return;
     }
 
-    console.log(`📋 Found ${response.notifications.length} completed session(s)`);
-    let hasNewNotifications = false;
-
-    // Show notification for each completed session that hasn't been notified yet
-    for (const notification of response.notifications) {
-      const sessionId = notification.sessionId;
-      
-      console.log(`🔍 Checking session ${sessionId}...`);
-      
-      // Skip if already notified
-      if (notifiedSessions.has(sessionId)) {
-        console.log(`⏭️ Session ${sessionId} already notified, skipping`);
-        continue;
+    // Show notification for each wallet that hasn't been notified yet
+    for (const wallet of completedWallets) {
+      if (!notifiedWallets.has(wallet)) {
+        await showClaimRewardsNotification(wallet);
+        notifiedWallets.add(wallet);
       }
-
-      console.log(`🔔 Showing notification for session ${sessionId}`);
-      
-      // Show notification
-      await showMiningCompleteNotification(notification.totalEarned, notification.walletAddress);
-      
-      // Mark as notified
-      notifiedSessions.add(sessionId);
-      hasNewNotifications = true;
-      
-      console.log(`✅ Notification shown for wallet ${notification.walletAddress}: ${notification.totalEarned.toFixed(4)} tokens`);
     }
-
-    return hasNewNotifications;
   } catch (error) {
-    console.error('❌ Error checking for completed mining:', error);
-    return false;
+    console.error('Error checking for completed mining:', error);
   }
 };
 
-// Clear notified session from tracking (when user claims)
-export const clearNotifiedSession = (sessionId: string) => {
-  notifiedSessions.delete(sessionId);
+// Clear notification tracking for a wallet (when user claims)
+export const clearNotificationTracking = (walletAddress: string) => {
+  notifiedWallets.delete(walletAddress);
 };
 
-// Schedule periodic checks (every 5 minutes)
+// Start periodic checking (every 2 minutes)
 let checkInterval: ReturnType<typeof setInterval> | null = null;
 
 export const startPeriodicCheck = () => {
@@ -125,25 +96,20 @@ export const startPeriodicCheck = () => {
   }
 
   // Check immediately
-  checkForCompletedMining();
+  checkAndNotify();
 
-  // Then check every 5 minutes
+  // Then check every 2 minutes
   checkInterval = setInterval(() => {
-    checkForCompletedMining();
-  }, 5 * 60 * 1000); // 5 minutes
+    checkAndNotify();
+  }, 2 * 60 * 1000);
 
-  console.log('✅ Started periodic mining completion checks');
+  console.log('✅ Started periodic notification checks (every 2 minutes)');
 };
 
 export const stopPeriodicCheck = () => {
   if (checkInterval) {
     clearInterval(checkInterval);
     checkInterval = null;
-    console.log('⏹️ Stopped periodic mining completion checks');
+    console.log('⏹️ Stopped periodic notification checks');
   }
-};
-
-// Cancel all notifications
-export const cancelAllNotifications = async () => {
-  await notifee.cancelAllNotifications();
 };

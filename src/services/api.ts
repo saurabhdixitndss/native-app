@@ -126,18 +126,13 @@ export interface Notification {
 }
 
 export const notificationAPI = {
-  getPendingNotifications: async (walletAddress: string) => {
-    const response = await api.get(`/notifications/pending/${walletAddress}`);
+  getCompletedWallets: async () => {
+    const response = await api.get('/notifications/completed-wallets');
     return response.data;
   },
 
-  getAllPendingNotifications: async () => {
-    const response = await api.get('/notifications/all');
-    return response.data;
-  },
-
-  clearNotification: async (sessionId: string) => {
-    const response = await api.post(`/notifications/clear/${sessionId}`);
+  clearNotification: async (walletAddress: string) => {
+    const response = await api.post(`/notifications/clear/${walletAddress}`);
     return response.data;
   },
 };

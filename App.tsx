@@ -13,7 +13,8 @@ import {
   configurePushNotifications, 
   startPeriodicCheck, 
   stopPeriodicCheck,
-  checkForCompletedMining 
+  checkAndNotify,
+  clearNotificationTracking
 } from './src/services/notificationService';
 
 type AppScreen = 'splash' | 'signup' | 'home' | 'mining' | 'claim';
@@ -29,14 +30,11 @@ function App() {
 
   const handleAppStateChange = React.useCallback((nextAppState: AppStateStatus) => {
     if (nextAppState === 'active') {
-      // App came to foreground - check for completed mining for ALL users
-      console.log('📱 App came to foreground - checking for completed mining (all users)...');
-      checkForCompletedMining();
-      
-      // Also check backend notifications for all users
-      checkPendingNotifications(user?.walletAddress);
+      // App came to foreground - check for completed mining
+      console.log('📱 App came to foreground - checking for completed mining...');
+      checkAndNotify();
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     loadConfig();
@@ -58,78 +56,6 @@ function App() {
     };
   }, [handleAppStateChange]);
 
-  const checkPendingNotifications = async (walletAddress?: string) => {
-    try {
-      // Check for ALL pending notifications (any user)
-      const response = await notificationAPI.getAllPendingNotifications();
-      
-      if (response.notifications && response.notifications.length > 0) {
-        // If a specific wallet is provided, prioritize its notifications
-        let notification = response.notifications[0];
-        
-        if (walletAddress) {
-          const userNotification = response.notifications.find(
-            (n: any) => n.walletAddress === walletAddress
-          );
-          if (userNotification) {
-            notification = userNotification;
-          }
-        }
-        
-        // Show alert with wallet info
-        const walletInfo = notification.walletAddress 
-          ? `\n\nWallet: ${notification.walletAddress.substring(0, 6)}...${notification.walletAddress.substring(notification.walletAddress.length - 4)}`
-          : '';
-        
-        Alert.alert(
-          '🎉 Mining Complete!',
-          notification.message + walletInfo,
-          [
-            {
-              text: 'View Details',
-              onPress: async () => {
-                // Clear notification
-                await notificationAPI.clearNotification(notification.sessionId);
-                
-                // Check if this is the current user's notification
-                const currentWallet = await AsyncStorage.getItem('walletAddress');
-                
-                if (currentWallet === notification.walletAddress) {
-                  // Current user - load session and navigate to claim screen
-                  const sessionData = await miningAPI.getActiveSession(notification.walletAddress);
-                  if (sessionData.session) {
-                    const statusResponse = await miningAPI.getMiningStatus(sessionData.session._id);
-                    setMiningSession({
-                      ...sessionData.session,
-                      totalEarned: statusResponse.status.currentReward,
-                    });
-                    setCurrentScreen('claim');
-                  }
-                } else {
-                  // Different user - show info message
-                  Alert.alert(
-                    'Different User',
-                    `This mining session belongs to wallet ${notification.walletAddress}.\n\nPlease log in with that wallet to claim the rewards.`,
-                    [{ text: 'OK' }]
-                  );
-                }
-              },
-            },
-            {
-              text: 'Later',
-              style: 'cancel',
-              onPress: () => {
-                // Don't clear notification - will show again next time
-              },
-            },
-          ]
-        );
-      }
-    } catch (error) {
-      console.error('Error checking pending notifications:', error);
-    }
-  };
-
   const loadConfig = async () => {
     try {
       const configData = await configAPI.getConfig();
@@ -142,9 +68,6 @@ function App() {
   const handleSplashFinish = async () => {
     try {
       console.log('Splash finished, checking for saved wallet...');
-      
-      // Check for any completed mining notifications (all users)
-      await checkPendingNotifications();
       
       const savedWallet = await AsyncStorage.getItem('walletAddress');
       
@@ -179,16 +102,6 @@ function App() {
       if (sessionData.session) {
         setMiningSession(sessionData.session);
         console.log('📍 Active session found, stored for later');
-        
-        // Check if mining is complete
-        const statusResponse = await miningAPI.getMiningStatus(sessionData.session._id);
-        if (statusResponse.status.isComplete) {
-          // Mining complete - check for notifications (all users)
-          await checkPendingNotifications(walletAddress);
-        }
-      } else {
-        // No active session for this user, but check for other users' completed mining
-        await checkPendingNotifications(walletAddress);
       }
 
       // Always navigate to Home Screen after login
@@ -338,6 +251,10 @@ function App() {
 
       // Clear session
       setMiningSession(null);
+
+      // Clear notification tracking and backend notification
+      clearNotificationTracking(user.walletAddress);
+      await notificationAPI.clearNotification(user.walletAddress);
 
       // Navigate to Home Screen
       setCurrentScreen('home');
