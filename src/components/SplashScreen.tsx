@@ -127,8 +127,8 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
               ],
             }}
           >
-            <Text style={styles.title}>⚡ CRYPTO MINER ⚡</Text>
-            <Text style={styles.subtitle}>💎 Loading your mining empire... 💎</Text>
+            <Text style={styles.title}>CRYPTO MINER</Text>
+            <Text style={styles.subtitle}>💎 Loading your mining empire... </Text>
           </Animated.View>
 
           {/* Loading Indicator */}

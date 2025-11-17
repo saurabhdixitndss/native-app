@@ -253,10 +253,11 @@ const styles = StyleSheet.create({
   walletContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
+    gap: 8,
+    paddingVertical: 4,
   },
   walletAddress: {
+    paddingVertical:10,
     fontSize: 16,
     fontWeight: '700',
     color: '#D1D5DB',
@@ -264,13 +265,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   balanceCard: {
+    paddingVertical:12,
     borderColor: 'rgba(251, 191, 36, 0.5)',
     backgroundColor: 'rgba(120, 53, 15, 0.3)',
   },
   balanceContent: {
     alignItems: 'center',
-    paddingVertical: 16,
-    gap: 8,
+    gap: 4,
   },
   balanceHeader: {
     flexDirection: 'row',

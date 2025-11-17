@@ -56,7 +56,7 @@ export function SignupScreen({ onSignup, loading = false }: SignupScreenProps) {
                     <Pickaxe size={48} color="#FFFFFF" />
                   </LinearGradient>
                 </View>
-                <CardTitle style={styles.title}>⚡ CRYPTO MINER ⚡</CardTitle>
+                <CardTitle style={styles.title}> CRYPTO MINER ⚡</CardTitle>
                 <CardDescription style={styles.description}>
                   Start mining tokens and build your crypto wealth
                 </CardDescription>

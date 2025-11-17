@@ -16,6 +16,7 @@ import {
   checkAndNotify,
   clearNotificationTracking
 } from './src/services/notificationService';
+import { initializeAdMob, loadRewardedAd } from './src/services/adMobService';
 
 type AppScreen = 'splash' | 'signup' | 'home' | 'mining' | 'claim';
 
@@ -38,6 +39,27 @@ function App() {
 
   useEffect(() => {
     loadConfig();
+    
+    // Initialize AdMob and load first ad
+    initializeAdMob().then((success) => {
+      if (success) {
+        console.log('🎯 AdMob initialized, loading first ad...');
+        // Load rewarded ad for multiplier upgrade
+        loadRewardedAd().then((loaded) => {
+          if (loaded) {
+            console.log('✅ First ad loaded successfully');
+          } else {
+            console.log('⚠️ First ad failed to load, will retry');
+            // Retry after 5 seconds
+            setTimeout(() => {
+              loadRewardedAd();
+            }, 5000);
+          }
+        });
+      } else {
+        console.error('❌ AdMob initialization failed');
+      }
+    });
     
     // Configure push notifications
     configurePushNotifications().catch(error => {
