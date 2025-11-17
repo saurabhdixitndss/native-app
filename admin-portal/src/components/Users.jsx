@@ -111,15 +111,28 @@ const Users = () => {
 
   return (
     <div>
-      <div className="table-container">
-        <div className="table-header">
-          <h2 className="table-title">All Users ({pagination.totalUsers || 0})</h2>
+      <div className="table-container" style={{
+        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%)',
+        border: '1px solid rgba(59, 130, 246, 0.3)',
+        boxShadow: '0 8px 32px rgba(59, 130, 246, 0.1)'
+      }}>
+        <div className="table-header" style={{
+          background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%)'
+        }}>
+          <h2 className="table-title">
+            <span style={{ marginRight: '8px' }}>👥</span>
+            All Users ({pagination.totalUsers || 0})
+          </h2>
           <input
             type="text"
-            placeholder="Search by wallet address..."
+            placeholder="🔍 Search by wallet address..."
             value={searchTerm}
             onChange={handleSearch}
             className="search-input"
+            style={{
+              background: 'rgba(59, 130, 246, 0.1)',
+              border: '1px solid rgba(59, 130, 246, 0.3)'
+            }}
           />
         </div>
 

@@ -56,18 +56,28 @@ const Analytics = () => {
 
   return (
     <div>
-      <div className="table-container" style={{ marginBottom: '30px' }}>
+      <div className="table-container" style={{ 
+        marginBottom: '30px',
+        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.05) 100%)',
+        border: '1px solid rgba(139, 92, 246, 0.3)'
+      }}>
         <div className="table-header">
           <h2 className="table-title">📊 Analytics Period</h2>
           <select
             value={days}
             onChange={(e) => setDays(Number(e.target.value))}
             className="search-input"
-            style={{ width: '150px' }}
+            style={{ 
+              width: '180px',
+              background: 'rgba(139, 92, 246, 0.1)',
+              border: '1px solid rgba(139, 92, 246, 0.3)',
+              color: '#FFFFFF',
+              fontWeight: '600'
+            }}
           >
-            <option value={7}>Last 7 days</option>
-            <option value={30}>Last 30 days</option>
-            <option value={90}>Last 90 days</option>
+            <option value={7} style={{ background: '#1A1A2E' }}>📅 Last 7 days</option>
+            <option value={30} style={{ background: '#1A1A2E' }}>📅 Last 30 days</option>
+            <option value={90} style={{ background: '#1A1A2E' }}>📅 Last 90 days</option>
           </select>
         </div>
       </div>
@@ -80,7 +90,11 @@ const Analytics = () => {
         marginBottom: '30px'
       }}>
         {/* Status Distribution Pie Chart */}
-        <div className="table-container">
+        <div className="table-container" style={{
+          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%)',
+          border: '1px solid rgba(59, 130, 246, 0.3)',
+          boxShadow: '0 8px 32px rgba(59, 130, 246, 0.1)'
+        }}>
           <div style={{ padding: '32px' }}>
             <PieChart
               data={statusChartData}
@@ -91,7 +105,11 @@ const Analytics = () => {
         </div>
 
         {/* Multiplier Usage Bar Chart */}
-        <div className="table-container">
+        <div className="table-container" style={{
+          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(236, 72, 153, 0.08) 100%)',
+          border: '1px solid rgba(139, 92, 246, 0.3)',
+          boxShadow: '0 8px 32px rgba(139, 92, 246, 0.1)'
+        }}>
           <div style={{ padding: '32px' }}>
             <BarChart
               data={multiplierChartData}
@@ -310,8 +328,14 @@ const Analytics = () => {
       </div>
 
       {/* Top Users Table */}
-      <div className="table-container">
-        <div className="table-header">
+      <div className="table-container" style={{
+        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(251, 191, 36, 0.05) 100%)',
+        border: '1px solid rgba(245, 158, 11, 0.3)',
+        boxShadow: '0 8px 32px rgba(245, 158, 11, 0.1)'
+      }}>
+        <div className="table-header" style={{
+          background: 'linear-gradient(90deg, rgba(245, 158, 11, 0.1) 0%, transparent 100%)'
+        }}>
           <h2 className="table-title">🏆 Top Users by Tokens</h2>
         </div>
         

@@ -49,10 +49,19 @@ const MiningSessions = () => {
 
   return (
     <div>
-      <div className="table-container">
-        <div className="table-header">
-          <h2 className="table-title">Mining Sessions ({pagination.totalSessions || 0})</h2>
-          <div style={{ display: 'flex', gap: '10px' }}>
+      <div className="table-container" style={{
+        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%)',
+        border: '1px solid rgba(16, 185, 129, 0.3)',
+        boxShadow: '0 8px 32px rgba(16, 185, 129, 0.1)'
+      }}>
+        <div className="table-header" style={{
+          background: 'linear-gradient(90deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%)'
+        }}>
+          <h2 className="table-title">
+            <span style={{ marginRight: '8px' }}>⛏️</span>
+            Mining Sessions ({pagination.totalSessions || 0})
+          </h2>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <select
               value={statusFilter}
               onChange={(e) => {
@@ -60,23 +69,32 @@ const MiningSessions = () => {
                 setCurrentPage(1);
               }}
               className="search-input"
-              style={{ width: '150px' }}
+              style={{ 
+                width: '150px',
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                fontWeight: '600'
+              }}
             >
-              <option value="">All Status</option>
-              <option value="mining">Mining</option>
-              <option value="claimed">Claimed</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="" style={{ background: '#1A1A2E' }}>📊 All Status</option>
+              <option value="mining" style={{ background: '#1A1A2E' }}>⛏️ Mining</option>
+              <option value="claimed" style={{ background: '#1A1A2E' }}>✓ Claimed</option>
+              <option value="cancelled" style={{ background: '#1A1A2E' }}>✗ Cancelled</option>
             </select>
             <input
               type="text"
-              placeholder="Filter by wallet..."
+              placeholder="🔍 Filter by wallet..."
               value={walletFilter}
               onChange={(e) => {
                 setWalletFilter(e.target.value);
                 setCurrentPage(1);
               }}
               className="search-input"
-              style={{ width: '200px' }}
+              style={{ 
+                width: '200px',
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.3)'
+              }}
             />
           </div>
         </div>

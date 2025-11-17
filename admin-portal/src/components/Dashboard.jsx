@@ -85,10 +85,23 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="table-container">
-        <div className="table-header">
+      <div className="table-container" style={{
+        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(236, 72, 153, 0.05) 100%)',
+        border: '1px solid rgba(139, 92, 246, 0.3)',
+        boxShadow: '0 8px 32px rgba(139, 92, 246, 0.1)'
+      }}>
+        <div className="table-header" style={{
+          background: 'linear-gradient(90deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%)'
+        }}>
           <h2 className="table-title">📋 System Overview</h2>
-          <button onClick={fetchDashboardStats} className="pagination-btn">
+          <button 
+            onClick={fetchDashboardStats} 
+            className="pagination-btn"
+            style={{
+              background: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)',
+              boxShadow: '0 4px 12px rgba(139, 92, 246, 0.4)'
+            }}
+          >
             🔄 Refresh Data
           </button>
         </div>
