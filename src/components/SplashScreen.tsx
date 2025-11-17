@@ -60,7 +60,7 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
 
     const timer = setTimeout(() => {
       onFinish();
-    }, 5000);
+    }, 6000);
 
     return () => clearTimeout(timer);
   }, [onFinish]);
@@ -83,10 +83,10 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
         <View style={styles.content}>
           {/* Crypto Animation with Purple Circle Background */}
           <View style={styles.topSection}>
-            {/* Animated Glow Background */}
+            {/* Neon Outer Ring */}
             <Animated.View
               style={[
-                styles.glowCircle,
+                styles.neonRing,
                 {
                   opacity: glowOpacity,
                   transform: [{ scale: scaleAnim }],
@@ -94,7 +94,10 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
               ]}
             />
 
-            {/* Crypto Animation - Centered in Circle */}
+            {/* Soft Radial Light */}
+            <View style={styles.radialLight} />
+
+            {/* Crypto Animation */}
             <Animated.View
               style={[
                 styles.animationContainer,
@@ -107,11 +110,12 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
               <LottieView
                 source={require('../assets/Crypto.json')}
                 autoPlay
-                loop={true}
+                loop
                 style={styles.animation}
               />
             </Animated.View>
           </View>
+
 
           {/* Title with Animation */}
           <Animated.View
@@ -188,53 +192,87 @@ const styles = StyleSheet.create({
     shadowRadius: 70,
     elevation: 25,
   },
+  neonRing: {
+    position: 'absolute',
+    width: width * 0.9,
+    height: width * 0.9,
+    borderRadius: width * 0.45,
+    borderWidth: 4,
+    borderColor: 'rgba(147, 51, 234, 0.9)',
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 40,
+    elevation: 35,
+    zIndex: -1,
+  },
+
+  radialLight: {
+    position: 'absolute',
+    width: width * 0.75,
+    height: width * 0.75,
+    borderRadius: width * 0.375,
+    backgroundColor: 'rgba(167, 139, 250, 0.25)',
+    filter: 'blur(40px)',
+    opacity: 0.6,
+  },
+
   animationContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 2,
+    zIndex: 10,
   },
+
   animation: {
-    width: width * 0.6,
-    height: width * 0.6,
+    width: width * 0.55,
+    height: width * 0.55,
   },
+
   title: {
-    fontSize: 40,
+    fontSize: 48,
     fontWeight: '900',
     color: '#FFFFFF',
-    textShadowColor: '#FBBF24',
-    textShadowOffset: { width: 0, height: 4 },
-    textShadowRadius: 35,
-    letterSpacing: 5,
     textAlign: 'center',
+    letterSpacing: 6,
+    textShadowColor: 'rgba(255, 215, 0, 0.9)',
+    textShadowOffset: { width: 0, height: 5 },
+    textShadowRadius: 40,
+    marginTop: 10,
     textTransform: 'uppercase',
   },
+
   subtitle: {
-    fontSize: 16,
-    color: '#FDE68A',
+    fontSize: 18,
+    color: '#EAB308',
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: 6,
     fontWeight: '600',
-    textShadowColor: '#F97316',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    opacity: 0.9,
+    textShadowColor: 'rgba(234, 179, 8, 0.6)',
+    textShadowRadius: 12,
   },
+
   loadingContainer: {
-    width: width * 0.6,
-    marginTop: 16,
+    width: width * 0.7,
+    marginTop: -10,
   },
+
   loadingBar: {
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 2,
+    height: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 6,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
   },
+
   loadingProgress: {
     height: '100%',
     width: '100%',
-    backgroundColor: '#FBBF24',
-    shadowColor: '#FBBF24',
+    backgroundColor: '#FACC15',
+    shadowColor: '#FACC15',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
-    shadowRadius: 10,
+    shadowRadius: 15,
   },
 });
