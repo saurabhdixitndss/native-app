@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import apiService from '../services/api';
+import PieChart from './charts/PieChart';
+import BarChart from './charts/BarChart';
+import LineChart from './charts/LineChart';
+import RadialProgress from './charts/RadialProgress';
 
 const Analytics = () => {
   const [analytics, setAnalytics] = useState(null);
@@ -40,11 +44,37 @@ const Analytics = () => {
     );
   }
 
+  // Prepare chart data
+  const statusChartData = analytics?.statusDistribution?.map(item => ({
+    label: item._id,
+    value: item.count
+  })) || [];
+
+  const multiplierChartData = analytics?.multiplierDistribution?.map(item => ({
+    label: `${item._id}x`,
+    value: item.count
+  })) || [];
+
+  const userGrowthChartData = analytics?.userGrowth?.map(item => ({
+    label: `${item._id.month}/${item._id.day}`,
+    value: item.count
+  })) || [];
+
+  const miningActivityChartData = analytics?.miningActivity?.map(item => ({
+    label: `${item._id.month}/${item._id.day}`,
+    value: item.sessions
+  })) || [];
+
+  const tokensEarnedChartData = analytics?.miningActivity?.map(item => ({
+    label: `${item._id.month}/${item._id.day}`,
+    value: item.tokensEarned || 0
+  })) || [];
+
   return (
     <div>
-      <div className="table-container" style={{ marginBottom: '20px' }}>
+      <div className="table-container" style={{ marginBottom: '30px' }}>
         <div className="table-header">
-          <h2 className="table-title">Analytics Period</h2>
+          <h2 className="table-title">📊 Analytics Period</h2>
           <select
             value={days}
             onChange={(e) => setDays(Number(e.target.value))}
@@ -58,7 +88,129 @@ const Analytics = () => {
         </div>
       </div>
 
-      <div className="stats-grid">
+      {/* Charts Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
+        gap: '30px',
+        marginBottom: '30px'
+      }}>
+        {/* Status Distribution Pie Chart */}
+        <div className="table-container">
+          <div style={{ padding: '32px' }}>
+            <PieChart
+              data={statusChartData}
+              title="📊 Session Status Distribution"
+              size={220}
+            />
+          </div>
+        </div>
+
+        {/* Multiplier Usage Bar Chart */}
+        <div className="table-container">
+          <div style={{ padding: '32px' }}>
+            <BarChart
+              data={multiplierChartData}
+              title="⚡ Multiplier Usage"
+              color="#8B5CF6"
+              height={300}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Line Charts */}
+      {userGrowthChartData.length > 0 && (
+        <div className="table-container" style={{ marginBottom: '30px' }}>
+          <div style={{ padding: '32px' }}>
+            <LineChart
+              data={userGrowthChartData}
+              title="📈 User Growth Over Time"
+              color="#3B82F6"
+              height={300}
+            />
+          </div>
+        </div>
+      )}
+
+      {miningActivityChartData.length > 0 && (
+        <div className="table-container" style={{ marginBottom: '30px' }}>
+          <div style={{ padding: '32px' }}>
+            <LineChart
+              data={miningActivityChartData}
+              title="⛏️ Mining Sessions Over Time"
+              color="#10B981"
+              height={300}
+            />
+          </div>
+        </div>
+      )}
+
+      {tokensEarnedChartData.length > 0 && (
+        <div className="table-container" style={{ marginBottom: '30px' }}>
+          <div style={{ padding: '32px' }}>
+            <LineChart
+              data={tokensEarnedChartData}
+              title="💰 Tokens Earned Over Time"
+              color="#F59E0B"
+              height={300}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Summary Cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '20px',
+        marginBottom: '30px'
+      }}>
+        <div className="stat-card" style={{ borderTop: '3px solid #3B82F6' }}>
+          <div className="stat-header">
+            <div className="stat-title">Total Sessions</div>
+            <div className="stat-icon">📊</div>
+          </div>
+          <div className="stat-value">
+            {analytics?.statusDistribution?.reduce((sum, item) => sum + item.count, 0) || 0}
+          </div>
+          <div className="stat-change">All mining sessions</div>
+        </div>
+
+        <div className="stat-card" style={{ borderTop: '3px solid #10B981' }}>
+          <div className="stat-header">
+            <div className="stat-title">Active Users</div>
+            <div className="stat-icon">👥</div>
+          </div>
+          <div className="stat-value">
+            {analytics?.topUsers?.length || 0}
+          </div>
+          <div className="stat-change">Top performers</div>
+        </div>
+
+        <div className="stat-card" style={{ borderTop: '3px solid #F59E0B' }}>
+          <div className="stat-header">
+            <div className="stat-title">Avg Duration</div>
+            <div className="stat-icon">⏱️</div>
+          </div>
+          <div className="stat-value">{analytics?.avgSessionDuration?.toFixed(1) || 0}h</div>
+          <div className="stat-change">Per session</div>
+        </div>
+
+        <div className="stat-card" style={{ borderTop: '3px solid #8B5CF6' }}>
+          <div className="stat-header">
+            <div className="stat-title">Total Tokens</div>
+            <div className="stat-icon">💰</div>
+          </div>
+          <div className="stat-value">
+            {analytics?.topUsers?.reduce((sum, user) => sum + user.totalTokens, 0).toFixed(2) || 0}
+          </div>
+          <div className="stat-change">Earned by top users</div>
+        </div>
+      </div>
+
+      {/* Quick Stats */}
+      <div className="stats-grid" style={{ marginBottom: '30px' }}>
         <div className="stat-card" style={{ borderTop: '3px solid #3B82F6' }}>
           <div className="stat-header">
             <div className="stat-title">Status Distribution</div>
@@ -193,19 +345,28 @@ const Analytics = () => {
           </div>
         </div>
 
-        <div className="stat-card" style={{ borderTop: '3px solid #F59E0B' }}>
-          <div className="stat-header">
-            <div className="stat-title">Avg Session Duration</div>
-            <div className="stat-icon">⏱️</div>
-          </div>
-          <div className="stat-value">{analytics?.avgSessionDuration?.toFixed(2) || 0}h</div>
-          <div className="stat-change">Average hours per session</div>
+        <div className="stat-card" style={{ 
+          borderTop: '3px solid #F59E0B',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '32px 24px'
+        }}>
+          <RadialProgress
+            value={analytics?.avgSessionDuration || 0}
+            maxValue={24}
+            label="Avg Session Duration (hours)"
+            color="#F59E0B"
+            size={140}
+          />
         </div>
       </div>
 
+      {/* Top Users Table */}
       <div className="table-container">
         <div className="table-header">
-          <h2 className="table-title">Top Users by Tokens</h2>
+          <h2 className="table-title">🏆 Top Users by Tokens</h2>
         </div>
         
         <table className="table">

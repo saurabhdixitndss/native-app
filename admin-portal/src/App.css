@@ -811,3 +811,52 @@ select.search-input:focus {
   transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
 }
+
+
+/* ============================================
+   CHARTS - Responsive
+   ============================================ */
+@media (max-width: 1200px) {
+  .charts-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .charts-grid {
+    gap: 20px !important;
+  }
+  
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Chart animations */
+@keyframes chartFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-container {
+  animation: chartFadeIn 0.6s ease;
+}
+
+/* Tooltip animations */
+@keyframes tooltipPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
