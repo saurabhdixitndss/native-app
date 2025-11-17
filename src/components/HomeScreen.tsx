@@ -497,11 +497,11 @@ const styles = StyleSheet.create({
   },
 
   appIconGlow: {
-    padding: 10,
+    padding: 12,
     borderRadius: 20,
     shadowColor: '#FBBF24',
-    shadowOpacity: 0.7,
-    shadowRadius: 16,
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
     shadowOffset: { width: 0, height: 0 },
   },
 
@@ -512,18 +512,21 @@ const styles = StyleSheet.create({
   },
 
   navEmojiBox: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    padding: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    padding: 10,
+    borderRadius: 16,
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
 
   navEmoji: {
-    fontSize: 22,
-    textShadowColor: '#FFD54F',
-    textShadowRadius: 10,
-    opacity: 0.95,
+    fontSize: 24,
+    textShadowColor: '#FBBF24',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 12,
+    opacity: 1,
   },
   navBarBackground: {
     position: 'absolute',
