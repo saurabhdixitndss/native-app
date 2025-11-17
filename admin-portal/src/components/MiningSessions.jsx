@@ -83,17 +83,18 @@ const MiningSessions = () => {
 
         {error && <div className="error">{error}</div>}
 
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Wallet</th>
-              <th>Duration</th>
-              <th>Multiplier</th>
-              <th>Status</th>
-              <th>Earned</th>
-              <th>Started</th>
-            </tr>
-          </thead>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Wallet</th>
+                <th>Duration</th>
+                <th>Multi</th>
+                <th>Status</th>
+                <th>Earned</th>
+                <th style={{ display: window.innerWidth < 768 ? 'none' : 'table-cell' }}>Started</th>
+              </tr>
+            </thead>
           <tbody>
             {sessions.map((session, index) => (
               <tr key={session._id} style={{ animationDelay: `${index * 0.05}s` }}>
@@ -147,7 +148,7 @@ const MiningSessions = () => {
                     </span>
                   </div>
                 </td>
-                <td>
+                <td style={{ display: window.innerWidth < 768 ? 'none' : 'table-cell' }}>
                   <span style={{ 
                     color: '#9CA3AF',
                     fontSize: '13px',
@@ -159,7 +160,8 @@ const MiningSessions = () => {
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+        </div>
 
         {sessions.length === 0 && !loading && (
           <div style={{ padding: '40px', textAlign: 'center', color: '#9CA3AF' }}>

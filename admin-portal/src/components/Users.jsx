@@ -125,18 +125,19 @@ const Users = () => {
 
         {error && <div className="error">{error}</div>}
 
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Wallet Address</th>
-              <th>Total Tokens</th>
-              <th>Total Paid</th>
-              <th>Payment Status</th>
-              <th>Last Payment</th>
-              <th>Joined Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Wallet</th>
+                <th>Tokens</th>
+                <th>Paid</th>
+                <th>Status</th>
+                <th style={{ display: window.innerWidth < 768 ? 'none' : 'table-cell' }}>Last Payment</th>
+                <th style={{ display: window.innerWidth < 768 ? 'none' : 'table-cell' }}>Joined</th>
+                <th>Action</th>
+              </tr>
+            </thead>
           <tbody>
             {users.map((user, index) => (
               <tr key={user._id} style={{ animationDelay: `${index * 0.05}s` }}>
@@ -196,7 +197,7 @@ const Users = () => {
                 <td>
                   {getPaymentStatusBadge(user)}
                 </td>
-                <td>
+                <td style={{ display: window.innerWidth < 768 ? 'none' : 'table-cell' }}>
                   <span style={{ 
                     color: '#9CA3AF',
                     fontSize: '13px',
@@ -205,7 +206,7 @@ const Users = () => {
                     {user.lastPaymentDate ? formatDate(user.lastPaymentDate) : 'Never'}
                   </span>
                 </td>
-                <td>
+                <td style={{ display: window.innerWidth < 768 ? 'none' : 'table-cell' }}>
                   <span style={{ 
                     color: '#9CA3AF',
                     fontSize: '13px',
@@ -219,22 +220,23 @@ const Users = () => {
                     onClick={() => handlePayment(user)}
                     disabled={user.totalTokens <= 0}
                     style={{
-                      padding: '8px 16px',
+                      padding: window.innerWidth < 768 ? '6px 10px' : '8px 16px',
                       background: user.totalTokens > 0 
                         ? 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)'
                         : 'rgba(255, 255, 255, 0.1)',
                       border: 'none',
                       borderRadius: '8px',
                       color: '#FFFFFF',
-                      fontSize: '12px',
+                      fontSize: window.innerWidth < 768 ? '10px' : '12px',
                       fontWeight: '700',
                       cursor: user.totalTokens > 0 ? 'pointer' : 'not-allowed',
                       transition: 'all 0.3s ease',
                       boxShadow: user.totalTokens > 0 ? '0 2px 8px rgba(139, 92, 246, 0.3)' : 'none',
-                      opacity: user.totalTokens > 0 ? 1 : 0.5
+                      opacity: user.totalTokens > 0 ? 1 : 0.5,
+                      whiteSpace: 'nowrap'
                     }}
                     onMouseEnter={(e) => {
-                      if (user.totalTokens > 0) {
+                      if (user.totalTokens > 0 && window.innerWidth >= 768) {
                         e.target.style.transform = 'translateY(-2px)';
                         e.target.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.5)';
                       }
@@ -244,13 +246,14 @@ const Users = () => {
                       e.target.style.boxShadow = user.totalTokens > 0 ? '0 2px 8px rgba(139, 92, 246, 0.3)' : 'none';
                     }}
                   >
-                    💰 Pay Tokens
+                    {window.innerWidth < 768 ? '💰' : '💰 Pay'}
                   </button>
                 </td>
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+        </div>
 
         {users.length === 0 && !loading && (
           <div style={{ padding: '40px', textAlign: 'center', color: '#9CA3AF' }}>

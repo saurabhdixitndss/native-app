@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import apiService from '../services/api';
 import PieChart from './charts/PieChart';
 import BarChart from './charts/BarChart';
-import LineChart from './charts/LineChart';
 import RadialProgress from './charts/RadialProgress';
 
 const Analytics = () => {
@@ -55,21 +54,6 @@ const Analytics = () => {
     value: item.count
   })) || [];
 
-  const userGrowthChartData = analytics?.userGrowth?.map(item => ({
-    label: `${item._id.month}/${item._id.day}`,
-    value: item.count
-  })) || [];
-
-  const miningActivityChartData = analytics?.miningActivity?.map(item => ({
-    label: `${item._id.month}/${item._id.day}`,
-    value: item.sessions
-  })) || [];
-
-  const tokensEarnedChartData = analytics?.miningActivity?.map(item => ({
-    label: `${item._id.month}/${item._id.day}`,
-    value: item.tokensEarned || 0
-  })) || [];
-
   return (
     <div>
       <div className="table-container" style={{ marginBottom: '30px' }}>
@@ -119,45 +103,7 @@ const Analytics = () => {
         </div>
       </div>
 
-      {/* Line Charts */}
-      {userGrowthChartData.length > 0 && (
-        <div className="table-container" style={{ marginBottom: '30px' }}>
-          <div style={{ padding: '32px' }}>
-            <LineChart
-              data={userGrowthChartData}
-              title="📈 User Growth Over Time"
-              color="#3B82F6"
-              height={300}
-            />
-          </div>
-        </div>
-      )}
 
-      {miningActivityChartData.length > 0 && (
-        <div className="table-container" style={{ marginBottom: '30px' }}>
-          <div style={{ padding: '32px' }}>
-            <LineChart
-              data={miningActivityChartData}
-              title="⛏️ Mining Sessions Over Time"
-              color="#10B981"
-              height={300}
-            />
-          </div>
-        </div>
-      )}
-
-      {tokensEarnedChartData.length > 0 && (
-        <div className="table-container" style={{ marginBottom: '30px' }}>
-          <div style={{ padding: '32px' }}>
-            <LineChart
-              data={tokensEarnedChartData}
-              title="💰 Tokens Earned Over Time"
-              color="#F59E0B"
-              height={300}
-            />
-          </div>
-        </div>
-      )}
 
       {/* Summary Cards */}
       <div style={{
