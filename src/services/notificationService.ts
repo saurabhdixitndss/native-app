@@ -63,11 +63,8 @@ export const showMiningCompleteNotification = async (
           id: 'claim',
           launchActivity: 'default',
         },
-        smallIcon: 'ic_notification',
         color: '#8B5CF6',
-        vibrationPattern: [300, 500, 300],
-        lights: ['#8B5CF6', 300, 600],
-        largeIcon: 'ic_launcher',
+        vibrationPattern: [100, 300, 200, 500], // [delay, vibrate, delay, vibrate] - must be even number of positive values
         style: {
           type: 1, // BigTextStyle
           text: `Wallet: ${shortWallet}\nTokens: ${tokensEarned.toFixed(2)}\n\nTap to claim your rewards now!`,
