@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 16,
-    paddingTop: 70, // ⬅⬅⬅ ADDED (push content below icons)
+    paddingTop: 30, // ⬅⬅⬅ ADDED (push content below icons)
     gap: 14,
   },
 
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
   },
   gameNavBar: {
     width: '100%',
-    position: 'absolute',
+    position: 'relative',
     top: 10,
     left: 0,
     paddingHorizontal: 16,
@@ -499,11 +499,11 @@ const styles = StyleSheet.create({
   
 
   appIconGlow: {
-    padding: 12,
-    borderRadius: 20,
+    padding: 14,
+    borderRadius: 22,
     shadowColor: '#FBBF24',
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
+    shadowOpacity: 1,
+    shadowRadius: 24,
     shadowOffset: { width: 0, height: 0 },
   },
 
@@ -514,13 +514,13 @@ const styles = StyleSheet.create({
   },
 
   navEmojiBox: {
-    backgroundColor: 'rgba(139, 92, 246, 0.15)',
-    padding: 10,
-    borderRadius: 16,
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    padding: 11,
+    borderRadius: 18,
     shadowColor: '#8B5CF6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
   },
 
   navEmoji: {
@@ -536,10 +536,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 55,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    // backdropFilter: 'blur(10px)', // iOS only
+    backgroundColor: 'transparent',
   },
 
 });

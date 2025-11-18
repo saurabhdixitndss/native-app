@@ -8,14 +8,7 @@ import { HomeScreen } from './src/components/HomeScreen';
 import { SelectDurationPopup } from './src/components/SelectDurationPopup';
 import { MiningScreen } from './src/components/MiningScreen';
 import { ClaimScreen } from './src/components/ClaimScreen';
-import { authAPI, miningAPI, configAPI, notificationAPI, User, MiningSession, Config } from './src/services/api';
-import { 
-  configurePushNotifications, 
-  startPeriodicCheck, 
-  stopPeriodicCheck,
-  checkAndNotify,
-  clearNotificationTracking
-} from './src/services/notificationService';
+import { authAPI, miningAPI, configAPI, User, MiningSession, Config } from './src/services/api';
 import { initializeAdMob, loadRewardedAd } from './src/services/adMobService';
 
 type AppScreen = 'splash' | 'signup' | 'home' | 'mining' | 'claim';
@@ -31,9 +24,8 @@ function App() {
 
   const handleAppStateChange = React.useCallback((nextAppState: AppStateStatus) => {
     if (nextAppState === 'active') {
-      // App came to foreground - check for completed mining
-      console.log('📱 App came to foreground - checking for completed mining...');
-      checkAndNotify();
+      // App came to foreground
+      console.log('📱 App came to foreground');
     }
   }, []);
 
@@ -61,20 +53,11 @@ function App() {
       }
     });
     
-    // Configure push notifications
-    configurePushNotifications().catch(error => {
-      console.error('Error configuring notifications:', error);
-    });
-    
-    // Start periodic checks for completed mining
-    startPeriodicCheck();
-    
     // Handle app state changes (foreground/background)
     const subscription = AppState.addEventListener('change', handleAppStateChange);
     
     return () => {
       subscription.remove();
-      stopPeriodicCheck();
     };
   }, [handleAppStateChange]);
 
@@ -273,10 +256,6 @@ function App() {
 
       // Clear session
       setMiningSession(null);
-
-      // Clear notification tracking and backend notification
-      clearNotificationTracking(user.walletAddress);
-      await notificationAPI.clearNotification(user.walletAddress);
 
       // Navigate to Home Screen
       setCurrentScreen('home');

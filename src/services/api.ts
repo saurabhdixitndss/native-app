@@ -118,23 +118,4 @@ export const configAPI = {
   },
 };
 
-export interface Notification {
-  sessionId: string;
-  message: string;
-  totalEarned: number;
-  completedAt: Date;
-}
-
-export const notificationAPI = {
-  getCompletedWallets: async () => {
-    const response = await api.get('/notifications/completed-wallets');
-    return response.data;
-  },
-
-  clearNotification: async (walletAddress: string) => {
-    const response = await api.post(`/notifications/clear/${walletAddress}`);
-    return response.data;
-  },
-};
-
 export default api;
