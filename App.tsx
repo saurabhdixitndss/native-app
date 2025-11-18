@@ -11,14 +11,14 @@ import { ClaimScreen } from './src/components/ClaimScreen';
 import { RewardsScreen } from './src/components/RewardsScreen';
 import { LeaderboardScreen } from './src/components/LeaderboardScreen';
 import { authAPI, miningAPI, configAPI, User, MiningSession, Config } from './src/services/api';
-import { initializeAdMob, loadRewardedAd } from './src/services/adMobService';
 import {
   setupNotifications,
-  checkMiningStatusAndNotify,
+  checkPendingNotifications,
   startPeriodicMiningCheck,
   stopPeriodicMiningCheck,
   cancelNotification,
 } from './src/services/notificationService';
+import { notificationAPI } from './src/services/api';
 
 type AppScreen = 'splash' | 'signup' | 'home' | 'mining' | 'claim' | 'rewards' | 'leaderboard';
 
@@ -33,13 +33,13 @@ function App() {
 
   const handleAppStateChange = React.useCallback((nextAppState: AppStateStatus) => {
     if (nextAppState === 'active') {
-      // App came to foreground - check mining status
-      console.log('📱 App came to foreground');
-      if (miningSession && user) {
-        checkMiningStatusAndNotify(miningSession._id, user.walletAddress);
+      // App came to foreground - check for pending notifications
+      console.log('📱 App came to foreground - checking for pending notifications');
+      if (user) {
+        checkPendingNotifications(user.walletAddress);
       }
     }
-  }, [miningSession, user]);
+  }, [user]);
 
   useEffect(() => {
     loadConfig();
@@ -53,27 +53,6 @@ function App() {
       }
     });
     
-    // Initialize AdMob and load first ad
-    initializeAdMob().then((success) => {
-      if (success) {
-        console.log('🎯 AdMob initialized, loading first ad...');
-        // Load rewarded ad for multiplier upgrade
-        loadRewardedAd().then((loaded) => {
-          if (loaded) {
-            console.log('✅ First ad loaded successfully');
-          } else {
-            console.log('⚠️ First ad failed to load, will retry');
-            // Retry after 5 seconds
-            setTimeout(() => {
-              loadRewardedAd();
-            }, 5000);
-          }
-        });
-      } else {
-        console.error('❌ AdMob initialization failed');
-      }
-    });
-    
     // Handle app state changes (foreground/background)
     const subscription = AppState.addEventListener('change', handleAppStateChange);
     
@@ -82,6 +61,22 @@ function App() {
       stopPeriodicMiningCheck();
     };
   }, [handleAppStateChange]);
+
+  // Start periodic notification checks when user is logged in
+  useEffect(() => {
+    if (user) {
+      console.log(`👤 User logged in: ${user.walletAddress}`);
+      console.log('⏰ Starting periodic notification checks...');
+      // Start checking for notifications every minute
+      startPeriodicMiningCheck('', user.walletAddress, 60000);
+      
+      // Check immediately
+      checkPendingNotifications(user.walletAddress);
+    } else {
+      console.log('👤 No user, stopping periodic checks');
+      stopPeriodicMiningCheck();
+    }
+  }, [user]);
 
   const loadConfig = async () => {
     try {
@@ -284,10 +279,10 @@ function App() {
         totalTokens: response.newBalance,
       });
 
-      // Cancel notification and stop periodic checks
+      // Mark as claimed in backend and cancel notification
+      await notificationAPI.markClaimed(miningSession._id);
       await cancelNotification(miningSession._id);
-      stopPeriodicMiningCheck();
-      console.log('🔕 Cancelled mining notifications');
+      console.log('✅ Marked session as claimed and cancelled notification');
 
       // Clear session
       setMiningSession(null);

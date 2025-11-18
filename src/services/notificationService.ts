@@ -104,32 +104,61 @@ export const cancelNotification = async (sessionId: string) => {
   }
 };
 
-// Check mining status and show notification if complete
-export const checkMiningStatusAndNotify = async (
-  sessionId: string,
-  walletAddress: string
-): Promise<boolean> => {
+// Check backend for pending notifications and show them
+export const checkPendingNotifications = async (walletAddress: string): Promise<boolean> => {
   try {
-    const statusResponse = await miningAPI.getMiningStatus(sessionId);
+    console.log(`🔍 Checking pending notifications for wallet: ${walletAddress}`);
+    const { notificationAPI } = await import('./api');
+    const response = await notificationAPI.getPending(walletAddress);
     
-    if (statusResponse.status.isComplete && statusResponse.status.canClaim) {
-      await showMiningCompleteNotification(
-        sessionId,
-        statusResponse.status.currentReward,
-        walletAddress
-      );
+    console.log(`📊 Found ${response.count} pending notifications`);
+    
+    if (response.notifications && response.notifications.length > 0) {
+      console.log(`📋 Notifications:`, response.notifications);
+      
+      // Show notification for each pending session that hasn't been notified
+      for (const notification of response.notifications) {
+        console.log(`Processing notification for session ${notification.sessionId}, notified: ${notification.notified}`);
+        
+        if (!notification.notified) {
+          console.log(`🔔 Showing notification for session ${notification.sessionId}`);
+          await showMiningCompleteNotification(
+            notification.sessionId,
+            notification.tokensEarned,
+            walletAddress
+          );
+          
+          // Mark as notified in backend
+          await notificationAPI.markShown(notification.sessionId);
+          console.log(`✅ Marked session ${notification.sessionId} as notified`);
+        } else {
+          console.log(`⏭️ Skipping already notified session ${notification.sessionId}`);
+        }
+      }
       return true;
+    } else {
+      console.log(`ℹ️ No pending notifications found`);
     }
     
     return false;
   } catch (error) {
-    console.error('Error checking mining status:', error);
+    console.error('❌ Error checking pending notifications:', error);
     return false;
   }
 };
 
-// Schedule periodic check for mining completion
+// Legacy function for backward compatibility
+export const checkMiningStatusAndNotify = async (
+  sessionId: string,
+  walletAddress: string
+): Promise<boolean> => {
+  // Now just checks backend for all pending notifications
+  return checkPendingNotifications(walletAddress);
+};
+
+// Schedule periodic check for pending notifications
 let checkInterval: ReturnType<typeof setInterval> | null = null;
+let currentWallet: string | null = null;
 
 export const startPeriodicMiningCheck = (
   sessionId: string,
@@ -139,19 +168,17 @@ export const startPeriodicMiningCheck = (
   // Clear any existing interval
   stopPeriodicMiningCheck();
 
-  console.log(`⏰ Starting periodic mining check for session ${sessionId}`);
+  currentWallet = walletAddress;
+  console.log(`⏰ Starting periodic notification check for wallet ${walletAddress}`);
 
   // Check immediately
-  checkMiningStatusAndNotify(sessionId, walletAddress);
+  checkPendingNotifications(walletAddress);
 
   // Then check periodically
   checkInterval = setInterval(() => {
-    checkMiningStatusAndNotify(sessionId, walletAddress).then((notified) => {
-      if (notified) {
-        // Stop checking once notification is shown
-        stopPeriodicMiningCheck();
-      }
-    });
+    if (currentWallet) {
+      checkPendingNotifications(currentWallet);
+    }
   }, intervalMs);
 };
 
@@ -159,7 +186,8 @@ export const stopPeriodicMiningCheck = () => {
   if (checkInterval) {
     clearInterval(checkInterval);
     checkInterval = null;
-    console.log('⏹️ Stopped periodic mining check');
+    currentWallet = null;
+    console.log('⏹️ Stopped periodic notification check');
   }
 };
 

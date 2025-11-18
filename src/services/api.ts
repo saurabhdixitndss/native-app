@@ -185,4 +185,28 @@ export const leaderboardAPI = {
   },
 };
 
+export interface PendingNotification {
+  sessionId: string;
+  tokensEarned: number;
+  completedAt: Date;
+  notified: boolean;
+}
+
+export const notificationAPI = {
+  getPending: async (walletAddress: string) => {
+    const response = await api.get(`/notifications/pending/${walletAddress}`);
+    return response.data;
+  },
+
+  markShown: async (sessionId: string) => {
+    const response = await api.post('/notifications/mark-shown', { sessionId });
+    return response.data;
+  },
+
+  markClaimed: async (sessionId: string) => {
+    const response = await api.post('/notifications/mark-claimed', { sessionId });
+    return response.data;
+  },
+};
+
 export default api;

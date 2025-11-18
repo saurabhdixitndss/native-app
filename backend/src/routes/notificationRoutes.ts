@@ -1,12 +1,16 @@
-import { Router } from 'express';
-import { getCompletedWallets, clearNotification } from '../controllers/notificationController';
+import express from 'express';
+import {
+  getPendingNotifications,
+  markNotificationShown,
+  markSessionClaimed,
+  triggerCheck,
+} from '../controllers/notificationController';
 
-const router = Router();
+const router = express.Router();
 
-// Get all wallets with completed mining
-router.get('/completed-wallets', getCompletedWallets);
-
-// Clear notification for a wallet
-router.post('/clear/:walletAddress', clearNotification);
+router.get('/pending/:walletAddress', getPendingNotifications);
+router.post('/mark-shown', markNotificationShown);
+router.post('/mark-claimed', markSessionClaimed);
+router.post('/trigger-check', triggerCheck); // For testing
 
 export default router;

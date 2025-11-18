@@ -14,7 +14,6 @@ import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Gift, Users, Coins } from './rn/Icons';
 import { rewardsAPI, referralAPI, DailyRewardsStatus, ReferralStats } from '../services/api';
-import { showRewardedAd } from '../services/adMobService';
 
 interface RewardsScreenProps {
   walletAddress: string;
@@ -57,43 +56,7 @@ export function RewardsScreen({ walletAddress, onBack, onBalanceUpdate }: Reward
     try {
       setClaiming(true);
 
-      // Try to show ad first
-      try {
-        const adShown = await showRewardedAd();
-        
-        if (!adShown) {
-          Alert.alert(
-            'Ad Not Ready',
-            'Ad is still loading. You can claim without watching the ad this time, or wait a moment and try again.',
-            [
-              { text: 'Wait', style: 'cancel', onPress: () => setClaiming(false) },
-              { 
-                text: 'Claim Anyway', 
-                style: 'default',
-                onPress: async () => {
-                  await claimRewardNow();
-                }
-              },
-            ]
-          );
-          return;
-        }
-      } catch (adError) {
-        console.log('Ad error, allowing claim anyway:', adError);
-        // If ad fails, allow claim anyway
-      }
-
-      // Claim reward after ad (or if ad failed)
-      await claimRewardNow();
-    } catch (error: any) {
-      console.error('Error claiming daily reward:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to claim reward');
-      setClaiming(false);
-    }
-  };
-
-  const claimRewardNow = async () => {
-    try {
+      // Claim reward directly (no ads)
       const response = await rewardsAPI.claimDaily(walletAddress);
       
       Alert.alert(
@@ -104,6 +67,9 @@ export function RewardsScreen({ walletAddress, onBack, onBalanceUpdate }: Reward
 
       onBalanceUpdate(response.newBalance);
       await loadData();
+    } catch (error: any) {
+      console.error('Error claiming daily reward:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to claim reward');
     } finally {
       setClaiming(false);
     }

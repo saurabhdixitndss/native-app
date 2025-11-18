@@ -11,6 +11,7 @@ import referralRoutes from './routes/referralRoutes';
 import leaderboardRoutes from './routes/leaderboardRoutes';
 import { errorHandler, notFound } from './middleware/errorHandler';
 import { initNotificationService } from './services/notificationService';
+import { startMiningMonitor } from './services/miningMonitorService';
 
 // Morgan with require to avoid TypeScript issues
 const morgan = require('morgan');
@@ -50,9 +51,12 @@ connectDB().then(() => {
   // Initialize notification service
   initNotificationService();
   
+  // Start mining monitor service (checks every 60 seconds)
+  startMiningMonitor(60000);
+  
   app.listen(PORT, () => {
     console.log('═══════════════════════════════════════════════════');
-    console.log('�  Crypto Miner Backend Server');
+    console.log('⛏️  Crypto Miner Backend Server');
     console.log('═══════════════════════════════════════════════════');
     console.log(`📡 Server running on port: ${PORT}`);
     console.log(`🌐 API URL: http://localhost:${PORT}/api`);
@@ -60,6 +64,7 @@ connectDB().then(() => {
     console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`📊 Logging: ${isDevelopment ? 'dev mode' : 'combined mode'}`);
     console.log(`🔔 Notification service: Active`);
+    console.log(`⏰ Mining monitor: Active (60s interval)`);
     console.log('═══════════════════════════════════════════════════');
   });
 });

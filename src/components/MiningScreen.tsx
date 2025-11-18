@@ -8,7 +8,6 @@ import { Progress } from './rn/Progress';
 import { Pickaxe, Coins, Clock, Zap } from './rn/Icons';
 import { Home } from './rn/Icons';
 import { miningAPI, MiningSession, Config } from '../services/api';
-import { showRewardedAd, isRewardedAdReady, loadRewardedAd, isRewardedAdLoading } from '../services/adMobService';
 
 interface MiningScreenProps {
   session: MiningSession;
@@ -129,82 +128,8 @@ export function MiningScreen({ session, config, onComplete, onGoHome, onUpgradeM
       return;
     }
 
-    // If ad is required, load and show it
-    if (nextOption.requiresAd) {
-      try {
-        // If ad is not ready, load it first
-        if (!isRewardedAdReady() && !isRewardedAdLoading()) {
-          console.log('⏳ Ad not ready, loading now...');
-          const loaded = await loadRewardedAd();
-          
-          if (!loaded) {
-            Alert.alert(
-              '❌ Ad Failed',
-              'Failed to load ad. Please check your internet connection and try again.',
-              [{ text: 'OK' }]
-            );
-            return;
-          }
-        }
-
-        // Wait a bit if ad is still loading
-        if (isRewardedAdLoading()) {
-          console.log('⏳ Waiting for ad to finish loading...');
-          // Wait up to 10 seconds for ad to load
-          let attempts = 0;
-          while (isRewardedAdLoading() && attempts < 20) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            attempts++;
-          }
-          
-          if (isRewardedAdLoading()) {
-            Alert.alert(
-              '⏳ Ad Loading',
-              'Ad is taking longer than expected. Please try again in a moment.',
-              [{ text: 'OK' }]
-            );
-            return;
-          }
-        }
-
-        // Check if ad is ready now
-        if (!isRewardedAdReady()) {
-          Alert.alert(
-            '❌ Ad Not Available',
-            'Ad could not be loaded. Please try again later.',
-            [{ text: 'OK' }]
-          );
-          return;
-        }
-
-        // Show ad
-        console.log('📺 Showing ad...');
-        const rewardEarned = await showRewardedAd();
-        
-        if (rewardEarned) {
-          // User watched the ad completely
-          console.log('✅ User watched ad, upgrading multiplier');
-          onUpgradeMultiplier(nextMultiplier);
-        } else {
-          // User closed ad early
-          Alert.alert(
-            'Ad Not Completed',
-            'You need to watch the full ad to upgrade your multiplier.',
-            [{ text: 'OK' }]
-          );
-        }
-      } catch (error) {
-        console.error('Error with ad:', error);
-        Alert.alert(
-          'Ad Error',
-          'Failed to show ad. Please try again later.',
-          [{ text: 'OK' }]
-        );
-      }
-    } else {
-      // Free upgrade, no ad required - upgrade immediately
-      onUpgradeMultiplier(nextMultiplier);
-    }
+    // All upgrades are now free (no ads required)
+    onUpgradeMultiplier(nextMultiplier);
   };
 
   const { hours, minutes, seconds: secs } = formatTime(remainingSeconds);

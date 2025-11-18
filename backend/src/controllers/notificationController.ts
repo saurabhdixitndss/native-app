@@ -1,31 +1,82 @@
 import { Request, Response } from 'express';
-import { getAllCompletedWallets, clearWalletNotification } from '../services/notificationService';
+import CompletedMining from '../models/CompletedMining';
+import { markAsNotified, markAsClaimed } from '../services/miningMonitorService';
 
-// Get all wallets with completed mining
-export const getCompletedWallets = async (req: Request, res: Response) => {
+// Get pending notifications for a wallet
+export const getPendingNotifications = async (req: Request, res: Response) => {
   try {
-    const wallets = getAllCompletedWallets();
-    
+    const { walletAddress } = req.params;
+
+    // Find all completed but unclaimed sessions
+    const pending = await CompletedMining.find({
+      walletAddress,
+      claimed: false,
+    }).sort({ completedAt: -1 });
+
     res.json({
-      wallets,
-      count: wallets.length,
+      success: true,
+      notifications: pending.map(item => ({
+        sessionId: item.sessionId,
+        tokensEarned: item.tokensEarned,
+        completedAt: item.completedAt,
+        notified: item.notified,
+      })),
+      count: pending.length,
     });
   } catch (error) {
-    console.error('Get completed wallets error:', error);
-    res.status(500).json({ message: 'Failed to fetch completed wallets' });
+    console.error('Error getting pending notifications:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-// Clear notification for a wallet
-export const clearNotification = async (req: Request, res: Response) => {
+// Mark notification as shown
+export const markNotificationShown = async (req: Request, res: Response) => {
   try {
-    const { walletAddress } = req.params;
-    
-    clearWalletNotification(walletAddress);
-    
-    res.json({ message: 'Notification cleared', wallet: walletAddress });
+    const { sessionId } = req.body;
+
+    await markAsNotified(sessionId);
+
+    res.json({
+      success: true,
+      message: 'Notification marked as shown',
+    });
   } catch (error) {
-    console.error('Clear notification error:', error);
-    res.status(500).json({ message: 'Failed to clear notification' });
+    console.error('Error marking notification:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Mark session as claimed (called when user claims rewards)
+export const markSessionClaimed = async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.body;
+
+    await markAsClaimed(sessionId);
+
+    res.json({
+      success: true,
+      message: 'Session marked as claimed',
+    });
+  } catch (error) {
+    console.error('Error marking as claimed:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Manual trigger for checking completed sessions (for testing)
+export const triggerCheck = async (req: Request, res: Response) => {
+  try {
+    const { checkCompletedSessions } = await import('../services/miningMonitorService');
+    
+    console.log('🔧 Manual check triggered via API');
+    await checkCompletedSessions();
+    
+    res.json({
+      success: true,
+      message: 'Check completed successfully',
+    });
+  } catch (error) {
+    console.error('Error triggering check:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
