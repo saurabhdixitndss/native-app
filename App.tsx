@@ -8,10 +8,11 @@ import { HomeScreen } from './src/components/HomeScreen';
 import { SelectDurationPopup } from './src/components/SelectDurationPopup';
 import { MiningScreen } from './src/components/MiningScreen';
 import { ClaimScreen } from './src/components/ClaimScreen';
+import { RewardsScreen } from './src/components/RewardsScreen';
 import { authAPI, miningAPI, configAPI, User, MiningSession, Config } from './src/services/api';
 import { initializeAdMob, loadRewardedAd } from './src/services/adMobService';
 
-type AppScreen = 'splash' | 'signup' | 'home' | 'mining' | 'claim';
+type AppScreen = 'splash' | 'signup' | 'home' | 'mining' | 'claim' | 'rewards';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('splash');
@@ -372,6 +373,33 @@ function App() {
     }
   };
 
+  const handleGoToRewards = () => {
+    setCurrentScreen('rewards');
+  };
+
+  const handleBackFromRewards = () => {
+    setCurrentScreen('home');
+  };
+
+  const handleBalanceUpdate = (newBalance: number) => {
+    if (user) {
+      setUser({ ...user, totalTokens: newBalance });
+    }
+  };
+
+  if (currentScreen === 'rewards' && user) {
+    return (
+      <SafeAreaProvider>
+        <StatusBar barStyle="light-content" />
+        <RewardsScreen
+          walletAddress={user.walletAddress}
+          onBack={handleBackFromRewards}
+          onBalanceUpdate={handleBalanceUpdate}
+        />
+      </SafeAreaProvider>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="light-content" />
@@ -381,6 +409,7 @@ function App() {
         onStartMining={handleStartMiningClick}
         onRefresh={() => user && loadUserData(user.walletAddress)}
         onLogout={handleLogout}
+        onGoToRewards={handleGoToRewards}
       />
       
       {showDurationPopup && config && (

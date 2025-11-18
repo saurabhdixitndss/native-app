@@ -13,6 +13,7 @@ interface HomeScreenProps {
   onStartMining: () => void;
   onRefresh: () => void;
   onLogout: () => void;
+  onGoToRewards: () => void;
 }
 
 export function HomeScreen({
@@ -20,7 +21,8 @@ export function HomeScreen({
   hasActiveSession,
   onStartMining,
   onRefresh,
-  onLogout
+  onLogout,
+  onGoToRewards
 }: HomeScreenProps) {
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -90,7 +92,7 @@ export function HomeScreen({
                 <Text style={styles.navEmoji}>⚙️</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => Alert.alert('🎁 Refer & Earn', 'Coming soon! Invite friends and earn rewards together.')} style={styles.navEmojiBox}>
+              <TouchableOpacity onPress={onGoToRewards} style={styles.navEmojiBox}>
                 <Text style={styles.navEmoji}>🎁</Text>
               </TouchableOpacity>
 

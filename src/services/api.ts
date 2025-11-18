@@ -118,4 +118,46 @@ export const configAPI = {
   },
 };
 
+export interface DailyRewardsStatus {
+  claimedToday: number;
+  maxDaily: number;
+  canClaim: boolean;
+  rewards: Array<{ amount: number; claimedAt: Date }>;
+}
+
+export interface ReferralStats {
+  wasReferred: boolean;
+  referredBy: string | null;
+  totalReferrals: number;
+  totalEarnings: number;
+  referrals: Array<{ wallet: string; earnings: number; createdAt: Date }>;
+}
+
+export const rewardsAPI = {
+  getDailyStatus: async (walletAddress: string) => {
+    const response = await api.get(`/rewards/daily/${walletAddress}`);
+    return response.data;
+  },
+
+  claimDaily: async (walletAddress: string) => {
+    const response = await api.post('/rewards/daily/claim', { walletAddress });
+    return response.data;
+  },
+};
+
+export const referralAPI = {
+  getStats: async (walletAddress: string) => {
+    const response = await api.get(`/referral/stats/${walletAddress}`);
+    return response.data;
+  },
+
+  createReferral: async (referrerWallet: string, referredWallet: string) => {
+    const response = await api.post('/referral/create', {
+      referrerWallet,
+      referredWallet,
+    });
+    return response.data;
+  },
+};
+
 export default api;

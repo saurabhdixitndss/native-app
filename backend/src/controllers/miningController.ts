@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { MiningSession } from '../models/MiningSession';
 import { User } from '../models/User';
 import { Config } from '../models/Config';
+import Referral from '../models/Referral';
 
 const formatDate = (date: Date): string => {
   const day = String(date.getDate()).padStart(2, '0');
@@ -178,6 +179,23 @@ export const claimReward = async (req: Request, res: Response) => {
 
     user.totalTokens += session.totalEarned;
     await user.save();
+
+    // Check if this user was referred and give 10% to referrer
+    const referral = await Referral.findOne({ referredWallet: session.wallet });
+    if (referral) {
+      const referrerBonus = parseFloat((session.totalEarned * 0.1).toFixed(2));
+      
+      const referrer = await User.findOne({ walletAddress: referral.referrerWallet });
+      if (referrer) {
+        referrer.totalTokens += referrerBonus;
+        await referrer.save();
+
+        referral.totalEarnings += referrerBonus;
+        await referral.save();
+
+        console.log(`💰 Referrer ${referral.referrerWallet} earned ${referrerBonus} (10% of ${session.totalEarned})`);
+      }
+    }
 
     session.status = 'claimed';
     session.lastUpdated = formatDate(new Date());
