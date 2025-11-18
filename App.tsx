@@ -11,14 +11,6 @@ import { ClaimScreen } from './src/components/ClaimScreen';
 import { RewardsScreen } from './src/components/RewardsScreen';
 import { LeaderboardScreen } from './src/components/LeaderboardScreen';
 import { authAPI, miningAPI, configAPI, User, MiningSession, Config } from './src/services/api';
-import {
-  setupNotifications,
-  checkPendingNotifications,
-  startPeriodicMiningCheck,
-  stopPeriodicMiningCheck,
-  cancelNotification,
-} from './src/services/notificationService';
-import { notificationAPI } from './src/services/api';
 
 type AppScreen = 'splash' | 'signup' | 'home' | 'mining' | 'claim' | 'rewards' | 'leaderboard';
 
@@ -33,50 +25,21 @@ function App() {
 
   const handleAppStateChange = React.useCallback((nextAppState: AppStateStatus) => {
     if (nextAppState === 'active') {
-      // App came to foreground - check for pending notifications
-      console.log('📱 App came to foreground - checking for pending notifications');
-      if (user) {
-        checkPendingNotifications(user.walletAddress);
-      }
+      // App came to foreground
+      console.log('📱 App came to foreground');
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     loadConfig();
-    
-    // Initialize notifications
-    setupNotifications().then((success) => {
-      if (success) {
-        console.log('🔔 Notifications initialized successfully');
-      } else {
-        console.error('❌ Notification initialization failed');
-      }
-    });
     
     // Handle app state changes (foreground/background)
     const subscription = AppState.addEventListener('change', handleAppStateChange);
     
     return () => {
       subscription.remove();
-      stopPeriodicMiningCheck();
     };
   }, [handleAppStateChange]);
-
-  // Start periodic notification checks when user is logged in
-  useEffect(() => {
-    if (user) {
-      console.log(`👤 User logged in: ${user.walletAddress}`);
-      console.log('⏰ Starting periodic notification checks...');
-      // Start checking for notifications every minute
-      startPeriodicMiningCheck('', user.walletAddress, 60000);
-      
-      // Check immediately
-      checkPendingNotifications(user.walletAddress);
-    } else {
-      console.log('👤 No user, stopping periodic checks');
-      stopPeriodicMiningCheck();
-    }
-  }, [user]);
 
   const loadConfig = async () => {
     try {
@@ -124,10 +87,6 @@ function App() {
       if (sessionData.session) {
         setMiningSession(sessionData.session);
         console.log('📍 Active session found, stored for later');
-        
-        // Start periodic check for this session
-        startPeriodicMiningCheck(sessionData.session._id, walletAddress, 60000);
-        console.log('⏰ Started periodic mining check for existing session');
       }
 
       // Always navigate to Home Screen after login
@@ -222,10 +181,6 @@ function App() {
       setMiningSession(response.session);
       setShowDurationPopup(false);
       setCurrentScreen('mining');
-
-      // Start periodic check for mining completion
-      startPeriodicMiningCheck(response.session._id, user.walletAddress, 60000); // Check every minute
-      console.log('⏰ Started periodic mining check for notifications');
     } catch (error: any) {
       console.error('Start mining error:', error);
       Alert.alert('Error', error.response?.data?.message || 'Failed to start mining');
@@ -278,11 +233,6 @@ function App() {
         ...user,
         totalTokens: response.newBalance,
       });
-
-      // Mark as claimed in backend and cancel notification
-      await notificationAPI.markClaimed(miningSession._id);
-      await cancelNotification(miningSession._id);
-      console.log('✅ Marked session as claimed and cancelled notification');
 
       // Clear session
       setMiningSession(null);

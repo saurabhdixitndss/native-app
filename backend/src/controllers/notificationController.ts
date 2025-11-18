@@ -2,16 +2,28 @@ import { Request, Response } from 'express';
 import CompletedMining from '../models/CompletedMining';
 import { markAsNotified, markAsClaimed } from '../services/miningMonitorService';
 
-// Get pending notifications for a wallet
+// Get pending notifications for a wallet (ONLY for THIS specific user)
 export const getPendingNotifications = async (req: Request, res: Response) => {
   try {
     const { walletAddress } = req.params;
 
-    // Find all completed but unclaimed sessions
+    console.log(`📱 API: Getting pending notifications for wallet: ${walletAddress}`);
+
+    // Find all completed but unclaimed sessions for THIS specific wallet ONLY
     const pending = await CompletedMining.find({
-      walletAddress,
-      claimed: false,
+      walletAddress, // Only THIS user's sessions
+      claimed: false, // Only unclaimed
     }).sort({ completedAt: -1 });
+
+    console.log(`📊 Found ${pending.length} pending notification(s) for ${walletAddress}`);
+    
+    if (pending.length > 0) {
+      console.log(`   Sessions:`, pending.map(p => ({
+        sessionId: p.sessionId,
+        tokens: p.tokensEarned,
+        notified: p.notified
+      })));
+    }
 
     res.json({
       success: true,
@@ -22,6 +34,7 @@ export const getPendingNotifications = async (req: Request, res: Response) => {
         notified: item.notified,
       })),
       count: pending.length,
+      walletAddress, // Confirm which wallet these notifications are for
     });
   } catch (error) {
     console.error('Error getting pending notifications:', error);

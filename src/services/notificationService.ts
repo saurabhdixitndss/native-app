@@ -43,7 +43,7 @@ export const setupNotifications = async () => {
   }
 };
 
-// Show mining complete notification
+// Show mining complete notification (ONLY for current logged-in user)
 export const showMiningCompleteNotification = async (
   sessionId: string,
   tokensEarned: number,
@@ -52,10 +52,14 @@ export const showMiningCompleteNotification = async (
   try {
     const shortWallet = `${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}`;
 
+    console.log(`🔔 Displaying notification for YOUR mining session ${sessionId}`);
+    console.log(`   Wallet: ${shortWallet}`);
+    console.log(`   Tokens: ${tokensEarned.toFixed(2)}`);
+
     await notifee.displayNotification({
       id: `mining-${sessionId}`,
-      title: '⛏️ Mining Complete!',
-      body: `You earned ${tokensEarned.toFixed(2)} tokens! Tap to claim your rewards.`,
+      title: '⛏️ Your Mining is Complete!',
+      body: `You earned ${tokensEarned.toFixed(2)} tokens! Tap to claim your rewards now.`,
       android: {
         channelId: 'mining-complete',
         importance: AndroidImportance.HIGH,
@@ -67,11 +71,11 @@ export const showMiningCompleteNotification = async (
         vibrationPattern: [100, 300, 200, 500], // [delay, vibrate, delay, vibrate] - must be even number of positive values
         style: {
           type: 1, // BigTextStyle
-          text: `Wallet: ${shortWallet}\nTokens: ${tokensEarned.toFixed(2)}\n\nTap to claim your rewards now!`,
+          text: `Your mining session is complete!\n\nWallet: ${shortWallet}\nTokens Earned: ${tokensEarned.toFixed(2)}\n\nTap to claim your rewards now!`,
         },
         actions: [
           {
-            title: '🎁 Claim Now',
+            title: '🎁 Claim Rewards',
             pressAction: {
               id: 'claim',
               launchActivity: 'default',
@@ -86,10 +90,10 @@ export const showMiningCompleteNotification = async (
       },
     });
 
-    console.log(`🔔 Mining complete notification shown for session ${sessionId}`);
+    console.log(`✅ Notification displayed successfully for YOUR session`);
     return true;
   } catch (error) {
-    console.error('Error showing notification:', error);
+    console.error('❌ Error showing notification:', error);
     return false;
   }
 };
@@ -104,24 +108,29 @@ export const cancelNotification = async (sessionId: string) => {
   }
 };
 
-// Check backend for pending notifications and show them
+// Check backend for pending notifications and show them (ONLY for current logged-in user)
 export const checkPendingNotifications = async (walletAddress: string): Promise<boolean> => {
   try {
-    console.log(`🔍 Checking pending notifications for wallet: ${walletAddress}`);
+    console.log(`🔍 [${new Date().toLocaleTimeString()}] Checking notifications for CURRENT USER: ${walletAddress}`);
     const { notificationAPI } = await import('./api');
     const response = await notificationAPI.getPending(walletAddress);
     
-    console.log(`📊 Found ${response.count} pending notifications`);
+    console.log(`📊 Found ${response.count} pending notifications for THIS user`);
     
     if (response.notifications && response.notifications.length > 0) {
-      console.log(`📋 Notifications:`, response.notifications);
+      console.log(`📋 Pending notifications for ${walletAddress}:`, response.notifications.map((n: any) => ({
+        sessionId: n.sessionId,
+        tokens: n.tokensEarned,
+        notified: n.notified
+      })));
       
       // Show notification for each pending session that hasn't been notified
+      let notifiedCount = 0;
       for (const notification of response.notifications) {
         console.log(`Processing notification for session ${notification.sessionId}, notified: ${notification.notified}`);
         
         if (!notification.notified) {
-          console.log(`🔔 Showing notification for session ${notification.sessionId}`);
+          console.log(`🔔 Showing notification for THIS user's session ${notification.sessionId}`);
           await showMiningCompleteNotification(
             notification.sessionId,
             notification.tokensEarned,
@@ -131,13 +140,18 @@ export const checkPendingNotifications = async (walletAddress: string): Promise<
           // Mark as notified in backend
           await notificationAPI.markShown(notification.sessionId);
           console.log(`✅ Marked session ${notification.sessionId} as notified`);
+          notifiedCount++;
         } else {
           console.log(`⏭️ Skipping already notified session ${notification.sessionId}`);
         }
       }
-      return true;
+      
+      if (notifiedCount > 0) {
+        console.log(`✅ Sent ${notifiedCount} notification(s) to current user`);
+      }
+      return notifiedCount > 0;
     } else {
-      console.log(`ℹ️ No pending notifications found`);
+      console.log(`ℹ️ No pending notifications for current user`);
     }
     
     return false;
@@ -156,9 +170,10 @@ export const checkMiningStatusAndNotify = async (
   return checkPendingNotifications(walletAddress);
 };
 
-// Schedule periodic check for pending notifications
+// Schedule periodic check for pending notifications (ONLY for current logged-in user)
 let checkInterval: ReturnType<typeof setInterval> | null = null;
 let currentWallet: string | null = null;
+let currentSession: string | null = null;
 
 export const startPeriodicMiningCheck = (
   sessionId: string,
@@ -169,7 +184,13 @@ export const startPeriodicMiningCheck = (
   stopPeriodicMiningCheck();
 
   currentWallet = walletAddress;
-  console.log(`⏰ Starting periodic notification check for wallet ${walletAddress}`);
+  currentSession = sessionId;
+  
+  console.log(`⏰ Starting periodic notification check for CURRENT USER`);
+  console.log(`   Wallet: ${walletAddress}`);
+  console.log(`   Session: ${sessionId || 'checking all sessions'}`);
+  console.log(`   Interval: ${intervalMs / 1000}s`);
+  console.log(`   ℹ️ Will ONLY notify THIS user about THEIR mining completion`);
 
   // Check immediately
   checkPendingNotifications(walletAddress);
@@ -177,6 +198,7 @@ export const startPeriodicMiningCheck = (
   // Then check periodically
   checkInterval = setInterval(() => {
     if (currentWallet) {
+      console.log(`⏰ [Periodic Check] Checking for ${currentWallet}...`);
       checkPendingNotifications(currentWallet);
     }
   }, intervalMs);
@@ -186,8 +208,10 @@ export const stopPeriodicMiningCheck = () => {
   if (checkInterval) {
     clearInterval(checkInterval);
     checkInterval = null;
+    const wallet = currentWallet;
     currentWallet = null;
-    console.log('⏹️ Stopped periodic notification check');
+    currentSession = null;
+    console.log(`⏹️ Stopped periodic notification check for ${wallet || 'user'}`);
   }
 };
 
