@@ -220,197 +220,143 @@ export function LeaderboardScreen({ walletAddress, onBack }: LeaderboardScreenPr
                   transform: [{ translateY: slideAnim }],
                 }}
               >
-                <LinearGradient
-                  colors={['rgba(139, 92, 246, 0.3)', 'rgba(59, 130, 246, 0.2)']}
-                  style={styles.userRankCard}
-                >
+                <View style={styles.userRankCard}>
+                  <View style={styles.neonBorder} />
                   <View style={styles.userRankContent}>
                     <View style={styles.userRankLeft}>
                       <Text style={styles.userRankLabel}>YOUR RANK</Text>
                       <Text style={styles.userRankValue}>#{userRank.rank}</Text>
-                      <Text style={styles.userRankTotal}>of {userRank.totalUsers} miners</Text>
                     </View>
                     <View style={styles.userRankRight}>
-                      <Coins size={32} color="#FBBF24" />
+                      <Text style={styles.userTokensLabel}>TOKENS</Text>
                       <Text style={styles.userTokens}>{userRank.totalTokens.toFixed(2)}</Text>
                     </View>
                   </View>
-                </LinearGradient>
+                </View>
               </Animated.View>
             )}
 
-            {/* Top 3 Podium */}
-            {top3.length > 0 && (
-              <View style={styles.podiumSection}>
-                <Animated.Text
-                  style={[
-                    styles.sectionTitle,
-                    {
-                      opacity: fadeAnim,
-                      transform: [{ scale: pulseAnim }],
-                    },
-                  ]}
-                >
-                  🌟 TOP MINERS 🌟
-                </Animated.Text>
-                
-                <View style={styles.podiumContainer}>
-                  {/* Reorder for visual podium: 2nd, 1st, 3rd */}
-                  {[top3[1], top3[0], top3[2]].filter(Boolean).map((entry, visualIndex) => {
-                    const actualRank = entry.rank;
-                    const colors = getPodiumColor(actualRank);
-                    const height = getPodiumHeight(actualRank);
-                    const emoji = getPodiumEmoji(actualRank);
-                    const isUser = isCurrentUser(entry.walletAddress);
-                    const animIndex = actualRank === 1 ? 1 : actualRank === 2 ? 0 : 2;
+            {/* Leaderboard List */}
+            <Animated.View
+              style={{
+                opacity: fadeAnim,
+              }}
+            >
+              {leaderboard.map((entry, index) => {
+                const isUser = isCurrentUser(entry.walletAddress);
+                const colors = getPodiumColor(entry.rank);
+                const animIndex = entry.rank <= 3 ? entry.rank - 1 : 0;
+                const maxTokens = leaderboard[0]?.totalTokens || 1;
+                const progress = (entry.totalTokens / maxTokens) * 100;
 
-                    return (
-                      <Animated.View
-                        key={entry.walletAddress}
+                return (
+                  <Animated.View
+                    key={entry.walletAddress}
+                    style={{
+                      opacity: entry.rank <= 3 ? podiumAnims[animIndex] : fadeAnim,
+                      transform: [
+                        {
+                          scale: entry.rank <= 3
+                            ? podiumAnims[animIndex].interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0.8, 1],
+                              })
+                            : 1,
+                        },
+                      ],
+                    }}
+                  >
+                    <View style={[styles.leaderCard, isUser && styles.leaderCardHighlight]}>
+                      {/* Neon Border */}
+                      <View
                         style={[
-                          styles.podiumItem,
-                          {
-                            opacity: podiumAnims[animIndex],
-                            transform: [
-                              {
-                                scale: podiumAnims[animIndex].interpolate({
-                                  inputRange: [0, 1],
-                                  outputRange: [0.3, 1],
-                                }),
-                              },
-                              {
-                                translateY: podiumAnims[animIndex].interpolate({
-                                  inputRange: [0, 1],
-                                  outputRange: [100, 0],
-                                }),
-                              },
-                            ],
-                          },
+                          styles.cardNeonBorder,
+                          entry.rank === 1 && styles.goldBorder,
+                          entry.rank === 2 && styles.silverBorder,
+                          entry.rank === 3 && styles.bronzeBorder,
+                          isUser && styles.userBorder,
                         ]}
-                      >
-                        {/* Trophy/Medal */}
+                      />
+
+                      {/* Shine Effect for Top 3 */}
+                      {entry.rank <= 3 && (
                         <Animated.View
                           style={[
-                            styles.podiumTrophy,
-                            actualRank === 1 && {
-                              transform: [{ scale: pulseAnim }],
+                            styles.cardShine,
+                            {
+                              transform: [
+                                {
+                                  translateX: shineAnim.interpolate({
+                                    inputRange: [-1, 2],
+                                    outputRange: [-200, 400],
+                                  }),
+                                },
+                              ],
                             },
                           ]}
-                        >
-                          <Text style={styles.podiumEmoji}>{emoji}</Text>
-                        </Animated.View>
+                        />
+                      )}
 
-                        {/* User Card */}
-                        <LinearGradient
-                          colors={colors}
-                          style={[
-                            styles.podiumCard,
-                            { height },
-                            isUser && styles.podiumCardHighlight,
-                          ]}
-                        >
-                          {/* Shine Effect */}
-                          {actualRank === 1 && (
-                            <Animated.View
-                              style={[
-                                styles.shineEffect,
-                                {
-                                  transform: [
-                                    {
-                                      translateX: shineAnim.interpolate({
-                                        inputRange: [-1, 2],
-                                        outputRange: [-100, 300],
-                                      }),
-                                    },
-                                  ],
-                                },
-                              ]}
-                            />
-                          )}
-
-                          <View style={styles.podiumRank}>
-                            <Text style={styles.podiumRankText}>#{actualRank}</Text>
+                      <View style={styles.cardContent}>
+                        {/* Left: Avatar & Rank */}
+                        <View style={styles.cardLeft}>
+                          <View
+                            style={[
+                              styles.avatar,
+                              entry.rank === 1 && styles.goldAvatar,
+                              entry.rank === 2 && styles.silverAvatar,
+                              entry.rank === 3 && styles.bronzeAvatar,
+                            ]}
+                          >
+                            <Text style={styles.avatarEmoji}>{getPodiumEmoji(entry.rank)}</Text>
                           </View>
-                          
-                          <View style={styles.podiumInfo}>
-                            <Text style={[styles.podiumWallet, isUser && styles.podiumWalletHighlight]}>
+                          <View style={styles.userInfo}>
+                            <Text style={styles.userName}>
                               {isUser ? 'YOU' : formatWallet(entry.walletAddress)}
                             </Text>
-                            <View style={styles.podiumTokens}>
-                              <Coins size={16} color="#FFFFFF" />
-                              <Text style={styles.podiumTokensText}>
-                                {entry.totalTokens.toFixed(2)}
-                              </Text>
+                            <View style={styles.rankBadge}>
+                              <Text style={styles.rankText}>#{entry.rank}</Text>
                             </View>
                           </View>
-                        </LinearGradient>
-                      </Animated.View>
-                    );
-                  })}
-                </View>
-              </View>
-            )}
+                        </View>
 
-            {/* Rest of Leaderboard */}
-            {rest.length > 0 && (
-              <Animated.View
-                style={[
-                  styles.listSection,
-                  {
-                    opacity: fadeAnim,
-                  },
-                ]}
-              >
-                <Text style={styles.sectionTitle}>ALL MINERS</Text>
-                
-                {rest.map((entry, index) => {
-                  const isUser = isCurrentUser(entry.walletAddress);
-                  
-                  return (
-                    <Animated.View
-                      key={entry.walletAddress}
-                      style={{
-                        opacity: fadeAnim,
-                        transform: [
-                          {
-                            translateX: fadeAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [50, 0],
-                            }),
-                          },
-                        ],
-                      }}
-                    >
-                      <LinearGradient
-                        colors={
-                          isUser
-                            ? ['rgba(139, 92, 246, 0.3)', 'rgba(59, 130, 246, 0.2)']
-                            : ['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.02)']
-                        }
-                        style={[styles.listItem, isUser && styles.listItemHighlight]}
-                      >
-                        <View style={styles.listRank}>
-                          <Text style={[styles.listRankText, isUser && styles.listRankTextHighlight]}>
-                            #{entry.rank}
-                          </Text>
+                        {/* Right: Tokens */}
+                        <View style={styles.cardRight}>
+                          <View style={styles.tokensContainer}>
+                            <Text style={styles.tokensValue}>
+                              {entry.totalTokens.toFixed(2)}
+                            </Text>
+                            <Coins size={16} color="#4ADE80" />
+                          </View>
                         </View>
-                        
-                        <View style={styles.listInfo}>
-                          <Text style={[styles.listWallet, isUser && styles.listWalletHighlight]}>
-                            {isUser ? 'YOU' : formatWallet(entry.walletAddress)}
-                          </Text>
+                      </View>
+
+                      {/* Progress Bar */}
+                      <View style={styles.progressBarContainer}>
+                        <View style={styles.progressBarBg}>
+                          <Animated.View
+                            style={[
+                              styles.progressBarFill,
+                              {
+                                width: `${progress}%`,
+                                backgroundColor:
+                                  entry.rank === 1
+                                    ? '#FFD700'
+                                    : entry.rank === 2
+                                    ? '#C0C0C0'
+                                    : entry.rank === 3
+                                    ? '#CD7F32'
+                                    : '#8B5CF6',
+                              },
+                            ]}
+                          />
                         </View>
-                        
-                        <View style={styles.listTokens}>
-                          <Coins size={14} color="#FBBF24" />
-                          <Text style={styles.listTokensText}>{entry.totalTokens.toFixed(2)}</Text>
-                        </View>
-                      </LinearGradient>
-                    </Animated.View>
-                  );
-                })}
-              </Animated.View>
-            )}
+                      </View>
+                    </View>
+                  </Animated.View>
+                );
+              })}
+            </Animated.View>
           </ScrollView>
         </SafeAreaView>
       </LinearGradient>
@@ -446,7 +392,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(139, 92, 246, 0.3)',
   },
   backButton: {
     padding: 8,
@@ -468,11 +414,26 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   userRankCard: {
-    borderRadius: 20,
+    backgroundColor: 'rgba(20, 20, 40, 0.8)',
+    borderRadius: 16,
     padding: 20,
-    marginBottom: 24,
+    marginBottom: 20,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  neonBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 16,
     borderWidth: 2,
-    borderColor: 'rgba(139, 92, 246, 0.5)',
+    borderColor: '#8B5CF6',
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
   },
   userRankContent: {
     flexDirection: 'row',
@@ -483,209 +444,201 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userRankLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
-    color: '#D1D5DB',
+    color: '#8B5CF6',
     letterSpacing: 1.5,
     textTransform: 'uppercase',
     marginBottom: 8,
   },
   userRankValue: {
-    fontSize: 48,
+    fontSize: 42,
     fontWeight: '900',
     color: '#FFFFFF',
     textShadowColor: '#8B5CF6',
-    textShadowOffset: { width: 0, height: 4 },
-    textShadowRadius: 20,
-    marginBottom: 4,
-  },
-  userRankTotal: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#9CA3AF',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 15,
   },
   userRankRight: {
-    alignItems: 'center',
-    gap: 8,
+    alignItems: 'flex-end',
+  },
+  userTokensLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#4ADE80',
+    letterSpacing: 1,
+    marginBottom: 4,
   },
   userTokens: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#FBBF24',
-  },
-  podiumSection: {
-    marginBottom: 32,
-  },
-  sectionTitle: {
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: '900',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    marginBottom: 24,
-    textShadowColor: '#8B5CF6',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 12,
+    color: '#4ADE80',
+    textShadowColor: '#4ADE80',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
-  podiumContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    gap: 8,
-    paddingHorizontal: 8,
-  },
-  podiumItem: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 12,
-  },
-  podiumTrophy: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  podiumEmoji: {
-    fontSize: 28,
-  },
-  podiumCard: {
-    width: '100%',
+  leaderCard: {
+    backgroundColor: 'rgba(20, 25, 45, 0.9)',
     borderRadius: 16,
-    padding: 12,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 16,
-    overflow: 'hidden',
+    padding: 16,
+    marginBottom: 12,
     position: 'relative',
+    overflow: 'hidden',
   },
-  podiumCardHighlight: {
-    borderColor: '#FFFFFF',
-    borderWidth: 3,
+  leaderCardHighlight: {
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
   },
-  shineEffect: {
+  cardNeonBorder: {
     position: 'absolute',
     top: 0,
     left: 0,
-    width: 50,
+    right: 0,
+    bottom: 0,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: 'rgba(100, 116, 139, 0.5)',
+  },
+  goldBorder: {
+    borderColor: '#FFD700',
+    shadowColor: '#FFD700',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12,
+  },
+  silverBorder: {
+    borderColor: '#C0C0C0',
+    shadowColor: '#C0C0C0',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+  },
+  bronzeBorder: {
+    borderColor: '#CD7F32',
+    shadowColor: '#CD7F32',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+  },
+  userBorder: {
+    borderColor: '#8B5CF6',
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12,
+  },
+  cardShine: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: 80,
     height: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     transform: [{ skewX: '-20deg' }],
   },
-  podiumRank: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  cardContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  cardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 12,
+  },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 12,
+    backgroundColor: 'rgba(100, 116, 139, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
+    borderColor: 'rgba(100, 116, 139, 0.5)',
   },
-  podiumRankText: {
+  goldAvatar: {
+    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+    borderColor: '#FFD700',
+    shadowColor: '#FFD700',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
+  },
+  silverAvatar: {
+    backgroundColor: 'rgba(192, 192, 192, 0.2)',
+    borderColor: '#C0C0C0',
+    shadowColor: '#C0C0C0',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+  },
+  bronzeAvatar: {
+    backgroundColor: 'rgba(205, 127, 50, 0.2)',
+    borderColor: '#CD7F32',
+    shadowColor: '#CD7F32',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+  },
+  avatarEmoji: {
+    fontSize: 32,
+  },
+  userInfo: {
+    flex: 1,
+    gap: 6,
+  },
+  userName: {
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
-  podiumInfo: {
+  rankBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(100, 116, 139, 0.4)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(148, 163, 184, 0.5)',
+  },
+  rankText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+  cardRight: {
+    alignItems: 'flex-end',
+  },
+  tokensContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    width: '100%',
   },
-  podiumWallet: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    letterSpacing: 0.5,
-  },
-  podiumWalletHighlight: {
-    fontSize: 14,
-    color: '#FFFFFF',
-    textShadowColor: '#000000',
-    textShadowOffset: { width: 0, height: 2 },
+  tokensValue: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#4ADE80',
+    textShadowColor: '#4ADE80',
+    textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
   },
-  podiumTokens: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+  progressBarContainer: {
+    width: '100%',
   },
-  podiumTokensText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#FFFFFF',
+  progressBarBg: {
+    height: 6,
+    backgroundColor: 'rgba(100, 116, 139, 0.3)',
+    borderRadius: 3,
+    overflow: 'hidden',
   },
-  listSection: {
-    marginBottom: 24,
-  },
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  listItemHighlight: {
-    borderColor: 'rgba(139, 92, 246, 0.5)',
-    borderWidth: 2,
-  },
-  listRank: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  listRankText: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#9CA3AF',
-  },
-  listRankTextHighlight: {
-    color: '#FFFFFF',
-  },
-  listInfo: {
-    flex: 1,
-  },
-  listWallet: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#D1D5DB',
-    letterSpacing: 0.5,
-  },
-  listWalletHighlight: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    fontWeight: '800',
-  },
-  listTokens: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  listTokensText: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#FBBF24',
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 3,
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
   },
 });

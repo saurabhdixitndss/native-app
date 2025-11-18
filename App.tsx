@@ -12,6 +12,13 @@ import { RewardsScreen } from './src/components/RewardsScreen';
 import { LeaderboardScreen } from './src/components/LeaderboardScreen';
 import { authAPI, miningAPI, configAPI, User, MiningSession, Config } from './src/services/api';
 import { initializeAdMob, loadRewardedAd } from './src/services/adMobService';
+import {
+  setupNotifications,
+  checkMiningStatusAndNotify,
+  startPeriodicMiningCheck,
+  stopPeriodicMiningCheck,
+  cancelNotification,
+} from './src/services/notificationService';
 
 type AppScreen = 'splash' | 'signup' | 'home' | 'mining' | 'claim' | 'rewards' | 'leaderboard';
 
@@ -26,13 +33,25 @@ function App() {
 
   const handleAppStateChange = React.useCallback((nextAppState: AppStateStatus) => {
     if (nextAppState === 'active') {
-      // App came to foreground
+      // App came to foreground - check mining status
       console.log('📱 App came to foreground');
+      if (miningSession && user) {
+        checkMiningStatusAndNotify(miningSession._id, user.walletAddress);
+      }
     }
-  }, []);
+  }, [miningSession, user]);
 
   useEffect(() => {
     loadConfig();
+    
+    // Initialize notifications
+    setupNotifications().then((success) => {
+      if (success) {
+        console.log('🔔 Notifications initialized successfully');
+      } else {
+        console.error('❌ Notification initialization failed');
+      }
+    });
     
     // Initialize AdMob and load first ad
     initializeAdMob().then((success) => {
@@ -60,6 +79,7 @@ function App() {
     
     return () => {
       subscription.remove();
+      stopPeriodicMiningCheck();
     };
   }, [handleAppStateChange]);
 
@@ -109,6 +129,10 @@ function App() {
       if (sessionData.session) {
         setMiningSession(sessionData.session);
         console.log('📍 Active session found, stored for later');
+        
+        // Start periodic check for this session
+        startPeriodicMiningCheck(sessionData.session._id, walletAddress, 60000);
+        console.log('⏰ Started periodic mining check for existing session');
       }
 
       // Always navigate to Home Screen after login
@@ -203,6 +227,10 @@ function App() {
       setMiningSession(response.session);
       setShowDurationPopup(false);
       setCurrentScreen('mining');
+
+      // Start periodic check for mining completion
+      startPeriodicMiningCheck(response.session._id, user.walletAddress, 60000); // Check every minute
+      console.log('⏰ Started periodic mining check for notifications');
     } catch (error: any) {
       console.error('Start mining error:', error);
       Alert.alert('Error', error.response?.data?.message || 'Failed to start mining');
@@ -255,6 +283,11 @@ function App() {
         ...user,
         totalTokens: response.newBalance,
       });
+
+      // Cancel notification and stop periodic checks
+      await cancelNotification(miningSession._id);
+      stopPeriodicMiningCheck();
+      console.log('🔕 Cancelled mining notifications');
 
       // Clear session
       setMiningSession(null);
