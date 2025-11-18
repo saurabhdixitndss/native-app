@@ -9,10 +9,11 @@ import { SelectDurationPopup } from './src/components/SelectDurationPopup';
 import { MiningScreen } from './src/components/MiningScreen';
 import { ClaimScreen } from './src/components/ClaimScreen';
 import { RewardsScreen } from './src/components/RewardsScreen';
+import { LeaderboardScreen } from './src/components/LeaderboardScreen';
 import { authAPI, miningAPI, configAPI, User, MiningSession, Config } from './src/services/api';
 import { initializeAdMob, loadRewardedAd } from './src/services/adMobService';
 
-type AppScreen = 'splash' | 'signup' | 'home' | 'mining' | 'claim' | 'rewards';
+type AppScreen = 'splash' | 'signup' | 'home' | 'mining' | 'claim' | 'rewards' | 'leaderboard';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('splash');
@@ -377,7 +378,15 @@ function App() {
     setCurrentScreen('rewards');
   };
 
+  const handleGoToLeaderboard = () => {
+    setCurrentScreen('leaderboard');
+  };
+
   const handleBackFromRewards = () => {
+    setCurrentScreen('home');
+  };
+
+  const handleBackFromLeaderboard = () => {
     setCurrentScreen('home');
   };
 
@@ -400,6 +409,18 @@ function App() {
     );
   }
 
+  if (currentScreen === 'leaderboard' && user) {
+    return (
+      <SafeAreaProvider>
+        <StatusBar barStyle="light-content" />
+        <LeaderboardScreen
+          walletAddress={user.walletAddress}
+          onBack={handleBackFromLeaderboard}
+        />
+      </SafeAreaProvider>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="light-content" />
@@ -410,6 +431,7 @@ function App() {
         onRefresh={() => user && loadUserData(user.walletAddress)}
         onLogout={handleLogout}
         onGoToRewards={handleGoToRewards}
+        onGoToLeaderboard={handleGoToLeaderboard}
       />
       
       {showDurationPopup && config && (

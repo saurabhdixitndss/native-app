@@ -14,6 +14,7 @@ interface HomeScreenProps {
   onRefresh: () => void;
   onLogout: () => void;
   onGoToRewards: () => void;
+  onGoToLeaderboard: () => void;
 }
 
 export function HomeScreen({
@@ -22,7 +23,8 @@ export function HomeScreen({
   onStartMining,
   onRefresh,
   onLogout,
-  onGoToRewards
+  onGoToRewards,
+  onGoToLeaderboard
 }: HomeScreenProps) {
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -96,7 +98,7 @@ export function HomeScreen({
                 <Text style={styles.navEmoji}>🎁</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => Alert.alert('🏆 Leaderboard', 'Coming soon! Compete with other miners and climb the ranks.')} style={styles.navEmojiBox}>
+              <TouchableOpacity onPress={onGoToLeaderboard} style={styles.navEmojiBox}>
                 <Text style={styles.navEmoji}>🏆</Text>
               </TouchableOpacity>
             </View>

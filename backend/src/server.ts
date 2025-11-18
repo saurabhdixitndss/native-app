@@ -8,6 +8,7 @@ import configRoutes from './routes/configRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import rewardsRoutes from './routes/rewardsRoutes';
 import referralRoutes from './routes/referralRoutes';
+import leaderboardRoutes from './routes/leaderboardRoutes';
 import { errorHandler, notFound } from './middleware/errorHandler';
 import { initNotificationService } from './services/notificationService';
 
@@ -36,6 +37,7 @@ app.use('/api/config', configRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/rewards', rewardsRoutes);
 app.use('/api/referral', referralRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Crypto Miner API is running' });

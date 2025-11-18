@@ -160,4 +160,29 @@ export const referralAPI = {
   },
 };
 
+export interface LeaderboardEntry {
+  rank: number;
+  walletAddress: string;
+  totalTokens: number;
+  createdAt: Date;
+}
+
+export interface UserRank {
+  rank: number;
+  totalUsers: number;
+  totalTokens: number;
+}
+
+export const leaderboardAPI = {
+  getLeaderboard: async (limit: number = 50) => {
+    const response = await api.get(`/leaderboard?limit=${limit}`);
+    return response.data;
+  },
+
+  getUserRank: async (walletAddress: string) => {
+    const response = await api.get(`/leaderboard/rank/${walletAddress}`);
+    return response.data;
+  },
+};
+
 export default api;
